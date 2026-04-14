@@ -219,15 +219,13 @@ export default function DonationModal({ open, onOpenChange, campaign, prefillAmo
       const refqaId = res.refqa_id;
       setOperationId(refqaId);
 
-      // Build /pay URL
-      const base = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-      const payParams = new URLSearchParams({ refqa_id: refqaId });
-      if (res.payment_url) payParams.set("payment_url", res.payment_url);
-      if (res.demo_mode) payParams.set("demo", "1");
-
-      // Open payment page
-      window.open(`${base}/pay?${payParams.toString()}`, "_blank", "noopener,noreferrer");
-      setPaymobUrl(res.payment_url || "");
+      // Embed payment page in modal as iframe
+      if (res.payment_url) {
+        setPaymobUrl(res.payment_url);
+      } else if (res.demo_mode) {
+        // Demo mode: show success after short delay
+        setPaymobUrl("demo");
+      }
       setStep("online_pay");
     } catch (e: any) { toast({ title: "خطأ", description: e.message, variant: "destructive" }); }
     finally { setPaymobLoading(false); }
@@ -260,7 +258,7 @@ export default function DonationModal({ open, onOpenChange, campaign, prefillAmo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg max-h-[92vh] overflow-y-auto p-0 gap-0">
+      <DialogContent className={`${step === "online_pay" && operationId && paymobUrl && paymobUrl !== "demo" ? "max-w-2xl" : "max-w-lg"} max-h-[92vh] overflow-y-auto p-0 gap-0 transition-all`}>
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-border">
           <DialogHeader>
@@ -400,7 +398,22 @@ export default function DonationModal({ open, onOpenChange, campaign, prefillAmo
                       if (paymentType === "manual") setStep("method");
                       else if (paymentType === "online") setStep("online_pay");
                       else if (paymentType === "home_delivery") setStep("home_form");
-                      else if (paymentType === "show_agent") setStep("success");
+                      else if (paymentType === "show_agent") {
+                        setSubmitting(true);
+                        api.post("/field-orders", {
+                          order_type: "show_agent",
+                          donor_name: donorName.trim(),
+                          donor_phone: donorPhone.trim(),
+                          amount: finalAmount,
+                          campaign_id: campaign?.id,
+                          campaign_title: campaign?.title,
+                        }).then((_res: any) => {
+                          const id = generateOperationId();
+                          setOperationId(id);
+                        }).catch(() => {}).finally(() => setSubmitting(false));
+                        setStep("success");
+                        triggerConfetti();
+                      }
                     }}
                     className="flex-1 gap-1.5"
                   >
@@ -414,36 +427,8 @@ export default function DonationModal({ open, onOpenChange, campaign, prefillAmo
             {step === "online_pay" && (
               <motion.div key="online_pay" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
 
-                {/* Payment page opened */}
-                {operationId && (
-                  <div className="bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-5 text-center space-y-3">
-                    <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto">
-                      <Globe className="w-7 h-7 text-emerald-600" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-emerald-800 dark:text-emerald-300">تم فتح صفحة الدفع</p>
-                      <p className="text-xs text-muted-foreground mt-1">أكمل الدفع في النافذة الجديدة</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-3 border border-emerald-200 dark:border-emerald-800">
-                      <p className="text-xs text-muted-foreground mb-1">رقم عمليتك</p>
-                      <p className="font-mono font-bold text-emerald-700 dark:text-emerald-400">{operationId}</p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        const base = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-                        const payParams = new URLSearchParams({ refqa_id: operationId });
-                        if (paymobUrl) payParams.set("payment_url", paymobUrl);
-                        window.open(`${base}/pay?${payParams.toString()}`, "_blank");
-                      }}
-                      className="text-xs text-emerald-600 dark:text-emerald-400 underline hover:no-underline"
-                    >
-                      افتح صفحة الدفع مجدداً
-                    </button>
-                  </div>
-                )}
-
-                {/* Pre-payment summary */}
-                {!operationId && (
+                {/* ── Pre-payment summary (before initiating) ── */}
+                {!operationId && !paymobLoading && (
                   <>
                     <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-200 dark:border-blue-900 rounded-2xl p-5 space-y-3">
                       <div className="flex items-center gap-3">
@@ -461,33 +446,86 @@ export default function DonationModal({ open, onOpenChange, campaign, prefillAmo
                         ))}
                       </div>
                     </div>
-
                     <div className="bg-muted rounded-xl p-4 text-sm space-y-1.5">
                       <div className="flex justify-between"><span className="text-muted-foreground">المتبرع:</span><span className="font-bold">{donorName}</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground">المبلغ:</span><span className="font-bold text-primary text-base">{formatCurrency(finalAmount)}</span></div>
                       {campaign && <div className="flex justify-between"><span className="text-muted-foreground">الحملة:</span><span className="font-bold">{campaign.title}</span></div>}
                     </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => setStep("info")} className="gap-1.5"><ArrowRight className="w-4 h-4" />رجوع</Button>
+                      <Button
+                        onClick={handleOnlinePay}
+                        disabled={paymobLoading}
+                        className="flex-1 gap-2 h-12 text-base bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                      >
+                        <Globe className="w-5 h-5" />ادفع الآن بأمان
+                      </Button>
+                    </div>
                   </>
                 )}
 
-                <div className="space-y-2">
-                  {!operationId && (
-                    <Button
-                      onClick={handleOnlinePay}
-                      disabled={paymobLoading}
-                      className="w-full gap-2 h-12 text-base bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                    >
-                      {paymobLoading ? <><Loader2 className="w-5 h-5 animate-spin" />جاري التحضير...</> : <><Globe className="w-5 h-5" />ادفع الآن بأمان</>}
-                    </Button>
-                  )}
-                  {operationId && (
-                    <Button onClick={() => setStep("success")} className="w-full bg-emerald-600 hover:bg-emerald-700">
-                      ✅ أتممت الدفع — إغلاق
-                    </Button>
-                  )}
-                </div>
+                {/* ── Loading spinner ── */}
+                {paymobLoading && (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+                    <p className="text-sm text-muted-foreground">جاري تحضير صفحة الدفع...</p>
+                  </div>
+                )}
 
-                <Button variant="ghost" onClick={() => setStep("info")} className="w-full gap-1.5"><ArrowRight className="w-4 h-4" />رجوع</Button>
+                {/* ── Paymob iframe — embeds payment page inside modal ── */}
+                {operationId && paymobUrl && paymobUrl !== "demo" && (
+                  <div className="space-y-3">
+                    <div className="bg-blue-500/10 border border-blue-200 dark:border-blue-900 rounded-xl p-3 flex items-center gap-3">
+                      <Shield className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-blue-700 dark:text-blue-300">دفع آمن داخل الموقع</p>
+                        <p className="text-[10px] text-muted-foreground font-mono truncate" dir="ltr">رقم العملية: {operationId}</p>
+                      </div>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(operationId); toast({ title: "✅ تم نسخ رقم العملية" }); }}
+                        className="flex-shrink-0 p-1.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-200 transition-colors"
+                        title="نسخ رقم العملية"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="rounded-xl overflow-hidden border border-border shadow-lg bg-white">
+                      <iframe
+                        src={paymobUrl}
+                        className="w-full"
+                        style={{ height: "520px", border: "none" }}
+                        title="بوابة الدفع الآمنة — Paymob"
+                        sandbox="allow-scripts allow-forms allow-same-origin allow-top-navigation allow-popups"
+                        allow="payment"
+                      />
+                    </div>
+                    <Button onClick={() => { setStep("success"); triggerConfetti(); }} className="w-full bg-emerald-600 hover:bg-emerald-700 gap-2">
+                      <CheckCircle2 className="w-4 h-4" /> أتممت الدفع بنجاح
+                    </Button>
+                  </div>
+                )}
+
+                {/* ── Demo mode ── */}
+                {operationId && paymobUrl === "demo" && (
+                  <div className="space-y-4">
+                    <div className="bg-amber-500/10 border border-amber-200 dark:border-amber-900 rounded-2xl p-5 text-center space-y-3">
+                      <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto">
+                        <Globe className="w-7 h-7 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-amber-800 dark:text-amber-300">وضع تجريبي</p>
+                        <p className="text-xs text-muted-foreground mt-1">بوابة الدفع لم تُضبط بعد — تواصل مع المدير</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 rounded-xl p-3 border border-amber-200 dark:border-amber-800">
+                        <p className="text-xs text-muted-foreground mb-1">رقم عمليتك</p>
+                        <p className="font-mono font-bold text-amber-700 dark:text-amber-400">{operationId}</p>
+                      </div>
+                    </div>
+                    <Button onClick={() => { setStep("success"); triggerConfetti(); }} className="w-full bg-emerald-600 hover:bg-emerald-700 gap-2">
+                      <CheckCircle2 className="w-4 h-4" /> تأكيد وإغلاق
+                    </Button>
+                  </div>
+                )}
               </motion.div>
             )}
 

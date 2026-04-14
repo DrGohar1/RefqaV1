@@ -23,10 +23,17 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
       <div className="container flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-3">
-          <img src={logoStamp} alt="شعار مؤسسة رفقاء البررة" className="w-10 h-10 rounded-xl object-cover" />
+        <Link to="/" className="flex items-center gap-3 group">
+          <motion.img
+            src={logoStamp}
+            alt="شعار مؤسسة رفقاء البررة"
+            className="w-10 h-10 rounded-xl object-cover shadow-sm"
+            whileHover={{ scale: 1.1, rotate: 3 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          />
           <div>
-            <h1 className="font-display text-lg font-bold text-primary leading-tight">رفقاء البررة</h1>
+            <h1 className="font-display text-lg font-bold text-primary leading-tight group-hover:text-primary/80 transition-colors">رفقاء البررة</h1>
             <p className="text-[10px] text-muted-foreground">إشهار 7932 — وزارة التضامن</p>
           </div>
         </Link>
