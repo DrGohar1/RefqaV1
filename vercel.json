@@ -5,13 +5,13 @@
   "outputDirectory": "vercel-output",
   "framework": null,
   "functions": {
-    "api-built/index.mjs": {
+    "api/handler.mjs": {
       "memory": 512,
       "maxDuration": 30
     }
   },
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api-built/index" },
+    { "source": "/api/:path*", "destination": "/api/handler" },
     { "source": "/((?!api).*)", "destination": "/index.html" }
   ],
   "headers": [
