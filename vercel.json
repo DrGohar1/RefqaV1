@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "pnpm install",
+  "installCommand": "corepack enable && corepack prepare pnpm@9.15.4 --activate && pnpm install",
   "buildCommand": "pnpm --filter @workspace/rafaqaa-website run build",
   "outputDirectory": "artifacts/rafaqaa-website/dist/public",
   "framework": null,
