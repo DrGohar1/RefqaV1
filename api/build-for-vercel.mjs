@@ -24,9 +24,16 @@ await build({
   format: "esm",
   target: "node20",
   outfile: path.join(__dirname, "handler.mjs"),
-  // Inject require shim so bundled CJS modules work in ESM context
+  // Inject require + __dirname/__filename shims so bundled CJS modules (e.g. connect-pg-simple) work in ESM context
   banner: {
-    js: `import { createRequire as __createRequire } from "module"; const require = __createRequire(import.meta.url);`,
+    js: [
+      `import { createRequire as __cjsRequire } from "module";`,
+      `import { fileURLToPath as __fileURLToPath } from "url";`,
+      `import { dirname as __pathDirname } from "path";`,
+      `const require = __cjsRequire(import.meta.url);`,
+      `const __filename = __fileURLToPath(import.meta.url);`,
+      `const __dirname = __pathDirname(__filename);`,
+    ].join("\n"),
   },
   external: [
     "*.node",

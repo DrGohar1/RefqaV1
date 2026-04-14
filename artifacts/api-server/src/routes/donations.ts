@@ -1,32 +1,72 @@
 import { Router } from "express";
-import { supabase } from "../lib/supabase.js";
-import { sendTelegramNotif, sendWhatsAppNotif, sendEmailNotif } from "./notifications.js";
+import { db } from "@workspace/db";
+import { donationsTable, campaignsTable } from "@workspace/db/schema";
+import { eq, desc, gte, lte, and, sql } from "drizzle-orm";
+import { sendTelegramNotif, sendWhatsAppNotif } from "./notifications.js";
 
 const router = Router();
 
 function requireAuth(req: any, res: any, next: any) {
-  if (!(req.session as any).user) {
-    return res.status(401).json({ message: "غير مصرح" });
-  }
+  if (!(req.session as any).user) return res.status(401).json({ message: "غير مصرح" });
   next();
 }
 
 router.get("/", async (req, res) => {
   try {
-    const { status, _limit, date_from, date_to } = req.query as Record<string, string>;
+    const { status, _limit, date_from, date_to, operation_id, donor_phone } = req.query as Record<string, string>;
 
-    let query = supabase
-      .from("donations")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const conditions: any[] = [];
+    if (status) conditions.push(eq(donationsTable.status, status));
+    if (date_from) conditions.push(gte(donationsTable.created_at, new Date(date_from)));
+    if (date_to) conditions.push(lte(donationsTable.created_at, new Date(date_to + "T23:59:59")));
 
-    if (status) query = query.eq("status", status) as any;
-    if (_limit) query = query.limit(Number(_limit)) as any;
-    if (date_from) query = query.gte("created_at", date_from) as any;
-    if (date_to) query = query.lte("created_at", date_to + "T23:59:59") as any;
+    let query = db
+      .select()
+      .from(donationsTable)
+      .orderBy(desc(donationsTable.created_at))
+      .where(conditions.length ? and(...conditions) : undefined) as any;
 
-    const { data, error } = await query;
-    if (error) throw error;
+    if (_limit) query = query.limit(Number(_limit));
+
+    let data = await query;
+
+    // Filter by operation_id or donor_phone (for tracking page)
+    if (operation_id) {
+      data = data.filter((d: any) =>
+        d.operation_id?.toLowerCase().includes(operation_id.toLowerCase()) ||
+        d.refqa_id?.toLowerCase().includes(operation_id.toLowerCase())
+      );
+    }
+    if (donor_phone) {
+      data = data.filter((d: any) => d.donor_phone?.includes(donor_phone));
+    }
+
+    res.json(data);
+  } catch (e: any) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+
+// GET /donations/track — public donor tracking by phone
+router.get("/track", async (req, res) => {
+  try {
+    const { phone, refqa_id } = req.query as Record<string, string>;
+    if (!phone) return res.status(400).json({ message: "رقم الهاتف مطلوب" });
+
+    let data = await db
+      .select()
+      .from(donationsTable)
+      .orderBy(desc(donationsTable.created_at))
+      .where(eq(donationsTable.donor_phone, phone.trim()));
+
+    if (refqa_id?.trim()) {
+      data = data.filter(d =>
+        d.refqa_id?.toLowerCase().includes(refqa_id.trim().toLowerCase()) ||
+        d.operation_id?.toLowerCase().includes(refqa_id.trim().toLowerCase())
+      );
+    }
+
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ message: e.message });
@@ -35,13 +75,13 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from("donations")
-      .select("*")
-      .eq("id", req.params.id)
-      .single();
-    if (error) return res.status(404).json({ message: "لم يُعثر على التبرع" });
-    res.json(data);
+    const [row] = await db
+      .select()
+      .from(donationsTable)
+      .where(eq(donationsTable.id, req.params.id))
+      .limit(1);
+    if (!row) return res.status(404).json({ message: "لم يُعثر على التبرع" });
+    res.json(row);
   } catch (e: any) {
     res.status(500).json({ message: e.message });
   }
@@ -59,22 +99,25 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "بيانات التبرع غير مكتملة" });
     }
 
-    const { data, error } = await supabase
-      .from("donations")
-      .insert({
-        donor_name, donor_phone, donor_email,
-        campaign_id, campaign_title,
-        amount: Number(amount),
+    const [row] = await db
+      .insert(donationsTable)
+      .values({
+        donor_name,
+        donor_phone,
+        donor_email: donor_email || null,
+        campaign_id: campaign_id || null,
+        campaign_title: campaign_title || null,
+        amount: String(Number(amount)),
         payment_method: payment_method || "bank_transfer",
-        operation_id, receipt_image_url, user_id, note,
+        operation_id,
+        refqa_id: operation_id,
+        receipt_image_url: receipt_image_url || null,
+        user_id: user_id || null,
+        note: note || null,
         status: "pending",
       })
-      .select()
-      .single();
+      .returning();
 
-    if (error) throw error;
-
-    // ── Telegram notification: new donation ──
     sendTelegramNotif(
       `💰 *تبرع جديد*\n` +
       `👤 *المتبرع:* ${donor_name}\n` +
@@ -86,13 +129,12 @@ router.post("/", async (req, res) => {
       `⏳ *الحالة:* قيد المراجعة`
     ).catch(() => {});
 
-    res.status(201).json(data);
+    res.status(201).json(row);
   } catch (e: any) {
     res.status(500).json({ message: e.message });
   }
 });
 
-// PATCH /:id/status — dedicated status update (used by AdminPaymentGateway)
 router.patch("/:id/status", requireAuth, async (req, res) => {
   try {
     const { status, notes } = req.body;
@@ -100,142 +142,73 @@ router.patch("/:id/status", requireAuth, async (req, res) => {
       return res.status(400).json({ message: "حالة غير صالحة" });
     }
 
-    // Get current donation first
-    const { data: current } = await supabase.from("donations").select("*").eq("id", req.params.id).single();
+    const [current] = await db
+      .select()
+      .from(donationsTable)
+      .where(eq(donationsTable.id, req.params.id))
+      .limit(1);
     if (!current) return res.status(404).json({ message: "لم يُعثر على التبرع" });
 
-    const updatePayload: any = { status };
-    if (notes) updatePayload.notes = notes;
-    if (status === "approved") updatePayload.confirmed_at = new Date().toISOString();
+    const updates: any = { status };
+    if (notes) updates.note = notes;
+    if (status === "approved") updates.confirmed_at = new Date();
 
-    const { data, error } = await supabase
-      .from("donations")
-      .update(updatePayload)
-      .eq("id", req.params.id)
-      .select()
-      .single();
+    const [updated] = await db
+      .update(donationsTable)
+      .set(updates)
+      .where(eq(donationsTable.id, req.params.id))
+      .returning();
 
-    if (error) return res.status(404).json({ message: "لم يُعثر على التبرع" });
-
-    // ── Update campaign raised amount on approval ──
-    if (status === "approved" && current.status !== "approved" && data.campaign_id) {
+    if (status === "approved" && current.status !== "approved" && updated.campaign_id) {
       try {
-        const { data: camp } = await supabase.from("campaigns").select("raised_amount").eq("id", data.campaign_id).single();
+        const [camp] = await db
+          .select()
+          .from(campaignsTable)
+          .where(eq(campaignsTable.id, updated.campaign_id))
+          .limit(1);
         if (camp) {
-          await supabase.from("campaigns").update({ raised_amount: Number(camp.raised_amount) + Number(data.amount), updated_at: new Date().toISOString() }).eq("id", data.campaign_id);
+          await db
+            .update(campaignsTable)
+            .set({
+              raised_amount: String(Number(camp.raised_amount) + Number(updated.amount)),
+              updated_at: new Date(),
+            })
+            .where(eq(campaignsTable.id, updated.campaign_id));
         }
       } catch {}
-    }
 
-    // ── If un-approving, subtract from campaign ──
-    if (status !== "approved" && current.status === "approved" && data.campaign_id) {
-      try {
-        const { data: camp } = await supabase.from("campaigns").select("raised_amount").eq("id", data.campaign_id).single();
-        if (camp) {
-          await supabase.from("campaigns").update({ raised_amount: Math.max(0, Number(camp.raised_amount) - Number(data.amount)) }).eq("id", data.campaign_id);
-        }
-      } catch {}
-    }
-
-    // ── Notifications on approval ──
-    if (status === "approved" && current.status !== "approved") {
-      // Telegram
       sendTelegramNotif(
-        `✅ *تم اعتماد تبرع*\n` +
-        `👤 *المتبرع:* ${data.donor_name}\n` +
-        `💵 *المبلغ:* ${Number(data.amount).toLocaleString("ar-EG")} جنيه\n` +
-        `🏷 *الحملة:* ${data.campaign_title || "عام"}\n` +
-        `🔖 *رقم Refqa:* ${data.refqa_id || data.operation_id}\n` +
-        (notes ? `📝 *ملاحظة:* ${notes}` : "")
+        `✅ *تم اعتماد تبرع*\n👤 ${updated.donor_name} | 💵 ${Number(updated.amount).toLocaleString("ar-EG")} ج | 🔖 ${updated.refqa_id || updated.operation_id}`
       ).catch(() => {});
 
-      // WhatsApp thank-you to donor
-      if (data.donor_phone) {
-        const thankYou = `شكراً لتبرعك الكريم يا ${data.donor_name}! تبرعك بمبلغ ${Number(data.amount).toLocaleString("ar-EG")} جنيه سيُغيِّر حياة كثيرين. بارك الله فيك. رقم عمليتك: ${data.refqa_id || data.operation_id}`;
-        sendWhatsAppNotif(data.donor_phone, thankYou).catch(() => {});
-      }
-
-      // Email thank-you to donor
-      if (data.donor_email) {
-        sendEmailNotif(
-          data.donor_email,
-          `✅ تم تأكيد تبرعك — مؤسسة رفقاء البررة`,
-          `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-            <h2 style="color:#2563eb">بارك الله فيك يا ${data.donor_name}!</h2>
-            <p>تم استلام تبرعك واعتماده بنجاح.</p>
-            <div style="background:#f3f4f6;border-radius:12px;padding:16px;margin:16px 0">
-              <p style="margin:4px 0"><strong>المبلغ:</strong> ${Number(data.amount).toLocaleString("ar-EG")} جنيه</p>
-              <p style="margin:4px 0"><strong>الحملة:</strong> ${data.campaign_title || "تبرع عام"}</p>
-              <p style="margin:4px 0"><strong>رقم العملية:</strong> ${data.refqa_id || data.operation_id}</p>
-              <p style="margin:4px 0"><strong>تاريخ التأكيد:</strong> ${new Date().toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" })}</p>
-            </div>
-            <p>جزاك الله خيراً على هذا العمل الطيب. تبرعك سيصنع فرقاً في حياة كثيرين.</p>
-            <p style="color:#6b7280;font-size:12px;margin-top:24px">مؤسسة رفقاء البررة — مرخصة من وزارة التضامن الاجتماعي رقم 7932</p>
-          </div>`
+      if (updated.donor_phone) {
+        sendWhatsAppNotif(
+          updated.donor_phone,
+          `شكراً لتبرعك الكريم يا ${updated.donor_name}! مبلغ ${Number(updated.amount).toLocaleString("ar-EG")} جنيه. رقم عمليتك: ${updated.refqa_id || updated.operation_id}`
         ).catch(() => {});
       }
     }
 
-    // ── Telegram notification on rejection ──
-    if (status === "rejected" && current.status !== "rejected") {
-      sendTelegramNotif(
-        `❌ *تم رفض تبرع*\n` +
-        `👤 *المتبرع:* ${data.donor_name}\n` +
-        `💵 *المبلغ:* ${Number(data.amount).toLocaleString("ar-EG")} جنيه\n` +
-        `🔖 *رقم:* ${data.refqa_id || data.operation_id}\n` +
-        (notes ? `📝 *السبب:* ${notes}` : "")
-      ).catch(() => {});
-    }
-
-    res.json(data);
-  } catch (e: any) {
-    res.status(500).json({ message: e.message });
-  }
-});
-
-// GET /track — public endpoint to track donations by phone (+ optional refqa_id)
-router.get("/track", async (req, res) => {
-  try {
-    const { phone, refqa_id } = req.query as Record<string, string>;
-    if (!phone) return res.status(400).json({ message: "رقم الهاتف مطلوب" });
-
-    let query = supabase
-      .from("donations")
-      .select("id, refqa_id, operation_id, donor_name, donor_phone, amount, campaign_title, payment_method, status, created_at, confirmed_at, notes")
-      .eq("donor_phone", phone.trim())
-      .order("created_at", { ascending: false });
-
-    if (refqa_id) {
-      query = query.or(`refqa_id.eq.${refqa_id},operation_id.eq.${refqa_id}`) as any;
-    }
-
-    const { data, error } = await query.limit(20);
-    if (error) throw error;
-    res.json(data || []);
-  } catch (e: any) {
-    res.status(500).json({ message: e.message });
-  }
-});
-
-// DELETE /:id — admin only
-router.delete("/:id", requireAuth, async (req, res) => {
-  try {
-    const { data: current } = await supabase.from("donations").select("*").eq("id", req.params.id).single();
-    if (!current) return res.status(404).json({ message: "لم يُعثر على التبرع" });
-
-    // If donation was approved, subtract from campaign raised amount
-    if (current.status === "approved" && current.campaign_id) {
+    if (status === "rejected" && current.status === "approved" && updated.campaign_id) {
       try {
-        const { data: camp } = await supabase.from("campaigns").select("raised_amount").eq("id", current.campaign_id).single();
+        const [camp] = await db
+          .select()
+          .from(campaignsTable)
+          .where(eq(campaignsTable.id, updated.campaign_id))
+          .limit(1);
         if (camp) {
-          await supabase.from("campaigns").update({ raised_amount: Math.max(0, Number(camp.raised_amount) - Number(current.amount)) }).eq("id", current.campaign_id);
+          await db
+            .update(campaignsTable)
+            .set({
+              raised_amount: String(Math.max(0, Number(camp.raised_amount) - Number(current.amount))),
+              updated_at: new Date(),
+            })
+            .where(eq(campaignsTable.id, updated.campaign_id));
         }
       } catch {}
     }
 
-    const { error } = await supabase.from("donations").delete().eq("id", req.params.id);
-    if (error) throw error;
-    res.json({ success: true, message: "تم حذف التبرع بنجاح" });
+    res.json(updated);
   } catch (e: any) {
     res.status(500).json({ message: e.message });
   }
@@ -245,33 +218,65 @@ router.patch("/:id", requireAuth, async (req, res) => {
   try {
     const { status, ...rest } = req.body;
 
-    const { data: current } = await supabase.from("donations").select("*").eq("id", req.params.id).single();
-
-    const { data, error } = await supabase
-      .from("donations")
-      .update({ status, ...rest })
-      .eq("id", req.params.id)
+    const [current] = await db
       .select()
-      .single();
+      .from(donationsTable)
+      .where(eq(donationsTable.id, req.params.id))
+      .limit(1);
 
-    if (error) return res.status(404).json({ message: "لم يُعثر على التبرع" });
+    const updates: any = { ...rest };
+    if (status) updates.status = status;
+    if (status === "approved" && current?.status !== "approved") {
+      updates.confirmed_at = new Date();
+    }
 
-    if (status === "approved" && current?.status !== "approved" && data.campaign_id) {
+    const [updated] = await db
+      .update(donationsTable)
+      .set(updates)
+      .where(eq(donationsTable.id, req.params.id))
+      .returning();
+
+    if (!updated) return res.status(404).json({ message: "لم يُعثر على التبرع" });
+
+    if (status === "approved" && current?.status !== "approved" && updated.campaign_id) {
       try {
-        const { data: camp } = await supabase.from("campaigns").select("raised_amount").eq("id", data.campaign_id).single();
+        const [camp] = await db
+          .select()
+          .from(campaignsTable)
+          .where(eq(campaignsTable.id, updated.campaign_id))
+          .limit(1);
         if (camp) {
-          await supabase.from("campaigns").update({ raised_amount: Number(camp.raised_amount) + Number(data.amount), updated_at: new Date().toISOString() }).eq("id", data.campaign_id);
+          await db
+            .update(campaignsTable)
+            .set({
+              raised_amount: String(Number(camp.raised_amount) + Number(updated.amount)),
+              updated_at: new Date(),
+            })
+            .where(eq(campaignsTable.id, updated.campaign_id));
         }
       } catch {}
 
-      // Send notifications
-      sendTelegramNotif(`✅ *تم اعتماد تبرع*\n👤 ${data.donor_name} | 💵 ${Number(data.amount).toLocaleString("ar-EG")} ج | 🔖 ${data.refqa_id || data.operation_id}`).catch(() => {});
-      if (data.donor_phone) {
-        sendWhatsAppNotif(data.donor_phone, `شكراً لتبرعك الكريم يا ${data.donor_name}! مبلغ ${Number(data.amount).toLocaleString("ar-EG")} جنيه. رقم عمليتك: ${data.refqa_id || data.operation_id}`).catch(() => {});
+      sendTelegramNotif(
+        `✅ *تم اعتماد تبرع*\n👤 ${updated.donor_name} | 💵 ${Number(updated.amount).toLocaleString("ar-EG")} ج | 🔖 ${updated.refqa_id || updated.operation_id}`
+      ).catch(() => {});
+      if (updated.donor_phone) {
+        sendWhatsAppNotif(
+          updated.donor_phone,
+          `شكراً لتبرعك الكريم يا ${updated.donor_name}! مبلغ ${Number(updated.amount).toLocaleString("ar-EG")} جنيه. رقم عمليتك: ${updated.refqa_id || updated.operation_id}`
+        ).catch(() => {});
       }
     }
 
-    res.json(data);
+    res.json(updated);
+  } catch (e: any) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+router.delete("/:id", requireAuth, async (req, res) => {
+  try {
+    await db.delete(donationsTable).where(eq(donationsTable.id, req.params.id));
+    res.json({ success: true, message: "تم حذف التبرع بنجاح" });
   } catch (e: any) {
     res.status(500).json({ message: e.message });
   }

@@ -1,25 +1,25 @@
 import { Router } from "express";
-import { supabase } from "../lib/supabase.js";
+import { db } from "@workspace/db";
+import { settingsTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
 function requireAuth(req: any, res: any, next: any) {
-  if (!(req.session as any).user) {
-    return res.status(401).json({ message: "غير مصرح" });
-  }
+  if (!(req.session as any).user) return res.status(401).json({ message: "غير مصرح" });
   next();
 }
 
 router.get("/:key", async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from("settings")
-      .select("value")
-      .eq("key", req.params.key)
-      .single();
+    const rows = await db
+      .select()
+      .from(settingsTable)
+      .where(eq(settingsTable.key, req.params.key))
+      .limit(1);
 
-    if (error || !data) return res.json({ value: null });
-    res.json({ value: data.value });
+    if (!rows.length) return res.json({ value: null });
+    res.json({ value: rows[0].value });
   } catch (e: any) {
     res.status(500).json({ message: e.message });
   }
@@ -29,14 +29,23 @@ router.put("/:key", requireAuth, async (req, res) => {
   try {
     const { value } = req.body;
 
-    const { error } = await supabase
-      .from("settings")
-      .upsert(
-        { key: req.params.key, value, updated_at: new Date().toISOString() },
-        { onConflict: "key" }
-      );
+    const existing = await db
+      .select()
+      .from(settingsTable)
+      .where(eq(settingsTable.key, req.params.key))
+      .limit(1);
 
-    if (error) throw error;
+    if (existing.length) {
+      await db
+        .update(settingsTable)
+        .set({ value, updated_at: new Date() })
+        .where(eq(settingsTable.key, req.params.key));
+    } else {
+      await db
+        .insert(settingsTable)
+        .values({ key: req.params.key, value });
+    }
+
     res.json({ success: true });
   } catch (e: any) {
     res.status(500).json({ message: e.message });

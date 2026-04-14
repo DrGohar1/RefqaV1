@@ -1,24 +1,29 @@
 import { Router } from "express";
-import { supabase } from "../lib/supabase.js";
+import { db } from "@workspace/db";
+import { donationsTable, campaignsTable } from "@workspace/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 const router = Router();
 
 router.get("/", async (_req, res) => {
   try {
-    const [{ data: donations }, { data: campaigns }] = await Promise.all([
-      supabase.from("donations").select("amount, status, donor_phone"),
-      supabase.from("campaigns").select("id"),
+    const [donations, campaigns] = await Promise.all([
+      db.select({
+        amount: donationsTable.amount,
+        status: donationsTable.status,
+        donor_phone: donationsTable.donor_phone,
+      }).from(donationsTable),
+      db.select({ id: campaignsTable.id }).from(campaignsTable),
     ]);
 
-    const allDonations = donations || [];
-    const approved = allDonations.filter((d: any) => d.status === "approved");
-    const totalRaised = approved.reduce((s: number, d: any) => s + Number(d.amount), 0);
-    const uniquePhones = new Set(allDonations.map((d: any) => d.donor_phone)).size;
+    const approved = donations.filter((d) => d.status === "approved");
+    const totalRaised = approved.reduce((s, d) => s + Number(d.amount), 0);
+    const uniquePhones = new Set(donations.map((d) => d.donor_phone)).size;
 
     res.json({
       donors: uniquePhones,
       totalRaised,
-      campaigns: (campaigns || []).length,
+      campaigns: campaigns.length,
       beneficiaries: Math.floor(totalRaised / 150),
     });
   } catch (e: any) {
