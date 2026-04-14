@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import logoImg from "@/assets/logo-stamp.jpg";
+const logoImg = "/logo-stamp.jpg";
 
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
