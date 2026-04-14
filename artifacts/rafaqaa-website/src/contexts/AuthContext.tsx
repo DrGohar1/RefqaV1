@@ -6,6 +6,8 @@ interface AdminUser {
   username: string;
   email?: string;
   role: "admin" | "moderator";
+  display_name?: string;
+  permissions?: Record<string, boolean>;
 }
 
 interface AuthContextType {
@@ -16,18 +18,39 @@ interface AuthContextType {
   signIn: (username: string, password: string) => Promise<{ error: string | null }>;
 }
 
+const AUTH_CACHE_KEY = "rafaqaa_auth_user";
+
+function getCachedUser(): AdminUser | null {
+  try {
+    const raw = localStorage.getItem(AUTH_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedUser(u: AdminUser | null) {
+  try {
+    if (u) localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(u));
+    else localStorage.removeItem(AUTH_CACHE_KEY);
+  } catch {}
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [user, setUser] = useState<AdminUser | null>(getCachedUser);
   const [loading, setLoading] = useState(true);
 
   const checkSession = async () => {
     try {
       const data = await api.get<{ user: AdminUser }>("/auth/me");
-      setUser(data?.user ?? null);
+      const serverUser = data?.user ?? null;
+      setUser(serverUser);
+      setCachedUser(serverUser);
     } catch {
-      setUser(null);
+      // API temporarily unavailable — keep cached session to prevent false logout
+      // If cookie is invalid, server will return {user: null} next time it's reachable
     } finally {
       setLoading(false);
     }
@@ -41,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const data = await api.post<{ user: AdminUser }>("/auth/login", { username, password });
       setUser(data.user);
+      setCachedUser(data.user);
       return { error: null };
     } catch (e: any) {
       return { error: e.message };
@@ -52,6 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await api.post("/auth/logout", {});
     } catch {}
     setUser(null);
+    setCachedUser(null);
   };
 
   const session = user ? { user } : null;
