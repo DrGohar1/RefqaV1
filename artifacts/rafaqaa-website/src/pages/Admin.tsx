@@ -26,7 +26,7 @@ import AdminSuccessStories from "@/components/admin/AdminSuccessStories";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import AdminSEO from "@/components/admin/AdminSEO";
 import AdminBackup from "@/components/admin/AdminBackup";
-import logoStamp from "@/assets/logo-stamp.jpg";
+const logoStamp = "/logo-stamp.jpg";
 
 type Tab =
   | "dashboard"
