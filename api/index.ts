@@ -1,13 +1,26 @@
 /**
- * Vercel Serverless Function — Rafaqaa API
- *
- * This file is the entry point for ALL /api/* requests on Vercel.
- * Vercel detects this file, compiles it with @vercel/node, and serves it as a serverless function.
- *
- * The Express app (artifacts/api-server/src/app.ts) is imported directly.
- * pnpm workspace packages (@workspace/db, etc.) are resolved via the workspace symlinks.
- */
+   * Vercel Serverless Function — Diagnostic wrapper
+   */
 
-import app from "../artifacts/api-server/src/app";
+  let app: any;
+  let initError: any;
 
-export default app;
+  try {
+    const mod = await import("../artifacts/api-server/src/app");
+    app = mod.default;
+  } catch (err) {
+    initError = err;
+  }
+
+  export default function handler(req: any, res: any) {
+    if (initError) {
+      res.status(500).json({
+        error: "App init failed",
+        message: String(initError?.message || initError),
+        stack: String(initError?.stack || "").slice(0, 500),
+      });
+      return;
+    }
+    return app(req, res);
+  }
+  
