@@ -2,22 +2,25 @@
 
 ## Overview
 
-موقع جمعية خيرية بالكامل مبني على pnpm monorepo مع React + Vite للفرونت وExpress API للباكند. البيانات التجارية (حملات وتبرعات) على Supabase، والنظام الإداري (مستخدمون وصلاحيات وبانرات) على PostgreSQL محلي.
+موقع جمعية خيرية بالكامل مبني على pnpm monorepo مع React + Vite للفرونت وExpress API للباكند. **جميع** البيانات (حملات، تبرعات، إعدادات، audit logs) على PostgreSQL (Neon) عبر Drizzle ORM — تم الترحيل الكامل من Supabase في أبريل 2026.
 
-## آخر التحديثات (v2.1)
-- **Kill Switch (site_disabled)**: إيقاف كامل للموقع من لوحة التحكم مع رسالة صيانة مخصصة. يوقف الدفع ويعرض maintenance page.
-- **Feature Flags محسّنة**: إضافة home_delivery, agent_donations — تفعّل/تعطّل طرق الدفع في DonationModal فعلياً.
-- **نظام المناديب محسّن**: 3 تبويبات — قائمة المناديب، طلبات مندوب معين (linked to field_orders)، تقارير الأداء مع ترتيب وشريط تقدم.
-- **إصلاح session store**: connect-pg-simple أصبح external في ESBuild لأنه يقرأ ملف SQL.
-- **README.md احترافي**: شامل لكل الـ stack والـ API وجداول Supabase والمتغيرات.
-- **أمان**: SAST scan نظيف، 0 critical vulnerabilities في الكود.
+## آخر التحديثات (v2.2 — أبريل 2026)
+- **ترحيل كامل من Supabase إلى Drizzle ORM**: settings, campaigns, donations, stats, audit-logs, backup, payments — جميعها على PostgreSQL (Neon).
+- **supabase.ts**: تم تحويله لـ safe no-op stub (chainable proxy) — لا يرمي أخطاء عند استيراده.
+- **إضافة /donations/track**: endpoint عام لتتبع التبرعات بالهاتف + رقم refqa.
+- **بذر الإعدادات**: feature_flags, payment_methods, social_links, whatsapp_template, seo كلها في Neon.
+- **GitHub push**: كل التغييرات على main → Vercel ينشر تلقائياً.
+- **Kill Switch**: إيقاف كامل للموقع من لوحة التحكم.
+- **Feature Flags**: تفعّل/تعطّل طرق الدفع في DonationModal فعلياً.
+- **نظام المناديب**: 3 تبويبات — قائمة، طلبات، تقارير أداء.
+- **إصلاح session store**: `__dirname/__filename` shims في api/build-for-vercel.mjs لـ ESM bundle.
 
 ## Stack
 
 - **Monorepo**: pnpm workspaces
 - **Node.js**: 24
 - **Frontend**: React 18 + Vite + TypeScript + Tailwind CSS v4 + Framer Motion
-- **Backend**: Express 5 + TypeScript + Drizzle ORM + PostgreSQL (local) + Supabase (business data)
+- **Backend**: Express 5 + TypeScript + Drizzle ORM + PostgreSQL (Neon) — كل البيانات
 - **Auth**: Session-based (express-session + bcryptjs) — admin only; `sameSite: none, secure: true, trust proxy: 1` for Replit HTTPS
 - **File upload**: multer → /api/uploads/receipts/
 - **RTL**: Arabic (Tajawal + Amiri fonts), direction: rtl
@@ -39,10 +42,11 @@
 ### `artifacts/api-server` — الخادم الخلفي
 - URL: `/api` (port 8080)
 - Routes:
-  - `GET/POST /api/campaigns` — CRUD للحملات (Supabase)
-  - `GET/POST/PATCH /api/donations` — CRUD للتبرعات (Supabase); PATCH يُحدّث الحالة + رفع الحملة
-  - `GET/PUT /api/settings/:key` — إعدادات key-value (Supabase)
-  - `GET/POST /api/audit-logs` — سجل العمليات (Supabase)
+  - `GET/POST /api/campaigns` — CRUD للحملات (Drizzle/PostgreSQL)
+  - `GET/POST/PATCH/DELETE /api/donations` — CRUD للتبرعات (Drizzle)
+  - `GET /api/donations/track?phone=&refqa_id=` — تتبع عام (بدون تسجيل دخول)
+  - `GET/PUT /api/settings/:key` — إعدادات key-value (Drizzle)
+  - `GET/POST /api/audit-logs` — سجل العمليات (Drizzle)
   - `POST /api/auth/login` — تسجيل الدخول (local admin_users table)
   - `GET /api/auth/me` — الجلسة الحالية
   - `POST /api/auth/logout` — تسجيل الخروج
@@ -83,23 +87,29 @@
 
 ## Database
 
-### Supabase (Business data)
+### PostgreSQL — Neon (Drizzle ORM) — جميع البيانات
 - `campaigns` — الحملات
 - `donations` — التبرعات
-- `settings` — إعدادات key-value
+- `settings` — إعدادات key-value (feature_flags, payment_methods, social_links, whatsapp_template, seo, general)
 - `audit_logs` — سجل العمليات
-
-### Local PostgreSQL (Drizzle ORM) — Admin system
 - `admin_users` — مستخدمو الإدارة (id, username, display_name, password_hash, permission_type_id, is_active, last_login)
 - `permission_types` — أنواع الصلاحيات (id, name, description, permissions jsonb, color)
-- `banners` — البانرات الترويجية (id, title, subtitle, badge_text, image_url, link_url, link_text, bg_color, display_order, is_active)
+- `banners` — البانرات الترويجية
+- `agents` — المناديب الميدانيون
+- `field_orders` — طلبات التحصيل المنزلي
+- `sessions` — جلسات تسجيل الدخول (connect-pg-simple)
 
 ## Admin Credentials
 
-- Default: username = `admin`, password = `admin123`
-- Stored as bcrypt hash in `admin_users` table (local PostgreSQL)
-- Seeded automatically on API server startup
-- Permission system: مدير كامل / مشرف تبرعات / متابع فقط (3 default roles)
+| المستخدم | كلمة المرور | الدور |
+|----------|------------|-------|
+| admin | Admin@2026 | مدير كامل |
+| supervisor | Super@2026 | مشرف |
+| data_entry | Entry@2026 | إدخال بيانات |
+| viewer | View@2026 | مشاهدة فقط |
+
+- مُخزَّنة كـ bcrypt hash في جدول `admin_users` — Neon PostgreSQL
+- Permission system: 8 صلاحيات قابلة للتخصيص لكل دور
 
 ## Admin Features
 
@@ -133,13 +143,19 @@
 ## Key Files
 
 - `artifacts/rafaqaa-website/src/lib/api-client.ts` — fetch wrapper, base URL `/api`
-- `artifacts/rafaqaa-website/src/lib/supabase-helpers.ts` — all data helper functions
-- `artifacts/rafaqaa-website/src/contexts/AuthContext.tsx` — session-based auth
+- `artifacts/rafaqaa-website/src/lib/supabase-helpers.ts` — data helper functions (all use api-client internally)
+- `artifacts/rafaqaa-website/src/contexts/AuthContext.tsx` — session-based admin auth
+- `artifacts/rafaqaa-website/src/contexts/FeatureFlagsContext.tsx` — feature flags from /settings/feature_flags
+- `artifacts/rafaqaa-website/src/contexts/SocialLinksContext.tsx` — social links from /settings/social_links
 - `artifacts/rafaqaa-website/src/index.css` — full design system with HSL tokens
-- `artifacts/api-server/src/lib/supabase.ts` — Supabase client (SUPABASE_URL, SUPABASE_ANON_KEY)
+- `artifacts/api-server/src/lib/supabase.ts` — safe no-op stub (no longer connects to Supabase)
 - `artifacts/api-server/src/app.ts` — Express app with session middleware (trust proxy)
-- `artifacts/api-server/src/routes/` — all API route files
-- `lib/db/src/schema/index.ts` — Drizzle ORM schema (admin_users, permission_types, banners)
+- `artifacts/api-server/src/routes/donations.ts` — CRUD + /track endpoint (Drizzle)
+- `artifacts/api-server/src/routes/settings.ts` — key-value settings (Drizzle)
+- `artifacts/api-server/src/routes/campaigns.ts` — campaigns CRUD (Drizzle)
+- `lib/db/src/schema/index.ts` — Drizzle ORM schema (all tables)
+- `api/build-for-vercel.mjs` — esbuild bundler for Vercel serverless (with __dirname shim)
+- `api/handler.mjs` — 3.2MB pre-built bundle (rebuilt by Vercel on each deploy)
 
 ## Development
 

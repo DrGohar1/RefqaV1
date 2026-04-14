@@ -31,12 +31,17 @@
 
 ---
 
-## 🗄 قواعد البيانات (Hybrid DB)
+## 🗄 قواعد البيانات (Full PostgreSQL)
+
+**تم ترحيل كامل من Supabase إلى PostgreSQL (Neon) في أبريل 2026.**
 
 | البيانات | الموقع | الأداة |
 |----------|--------|--------|
-| campaigns, donations, settings, payment_methods | **Supabase** | supabase-js client |
-| users (admin), sessions, banners, agents, notification_settings | **PostgreSQL محلي** | Drizzle ORM |
+| campaigns, donations, settings, audit_logs | **Neon PostgreSQL** | Drizzle ORM |
+| admin_users, permission_types, banners, sessions | **Neon PostgreSQL** | Drizzle ORM |
+| agents, field_orders | **Neon PostgreSQL** | Drizzle ORM |
+
+> `supabase.ts` أصبح stub آمن — لا يتصل بـ Supabase، لمنع كسر الكود القديم.
 
 ---
 
@@ -127,7 +132,7 @@
 
 ## 🎯 Feature Flags
 
-الـ flags تُقرأ من Supabase عند بدء التطبيق وعند `refreshFlags()`.
+الـ flags تُقرأ من `/api/settings/feature_flags` (PostgreSQL) عند بدء التطبيق وعند `refreshFlags()`.
 
 | المفتاح | الوصف |
 |---------|-------|
@@ -151,7 +156,7 @@
 
 ## 📲 Social Links
 
-مُخزَّنة في Supabase settings بمفتاح `social_links`:
+مُخزَّنة في PostgreSQL settings بمفتاح `social_links` — قابلة للتعديل من AdminSettings:
 ```json
 {
   "facebook": "https://...",
@@ -190,17 +195,25 @@ pnpm --filter @workspace/db run push
 
 ---
 
-## ☁️ النشر على Vercel + Render
+## ☁️ النشر على Vercel (Serverless)
 
-### الخادم (Render.com)
-1. Web Service → Node.js → Build: `pnpm --filter @workspace/api-server run build`
-2. Start: `node artifacts/api-server/dist/index.mjs`
-3. Variables: `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SESSION_SECRET`
+### إعداد Vercel
 
-### الواجهة (Vercel)
-1. Framework: Vite → Root: `artifacts/rafaqaa-website`
-2. Build: `pnpm run build` → Output: `dist`
-3. Variables: `VITE_API_URL=https://your-render-url.onrender.com`
+المشروع يُنشر على Vercel كـ Serverless Function واحدة:
+- **Static files**: `vercel-output/` (React build)
+- **API Function**: `api/handler.mjs` (Express bundled by esbuild)
+
+```bash
+# متغيرات Vercel المطلوبة:
+DATABASE_URL=postgresql://...
+SESSION_SECRET=...
+PAYMOB_API_KEY=... (اختياري)
+```
+
+### التشغيل التلقائي
+1. دفع إلى GitHub main → Vercel يكتشف ويبني تلقائياً
+2. Build Command: `pnpm --filter @workspace/rafaqaa-website run build && node api/build-for-vercel.mjs`
+3. Output: `vercel-output/` + `api/handler.mjs`
 
 ---
 
@@ -208,18 +221,44 @@ pnpm --filter @workspace/db run push
 
 | المشكلة | السبب | الحل |
 |---------|-------|------|
-| CORS error | الـ API URL خاطئ | تأكد من `VITE_API_URL` |
-| Session لا تُحفظ | DB غير متصل | راجع `DATABASE_URL` |
-| Social links لا تظهر | `social_links` غير محفوظ | اضبطها من AdminSettings |
-| Payment لا يعمل | Paymob غير مُفعَّل | تحقق من payment_settings في DB |
-| Feature flag لا يتغير | يحتاج `refreshFlags()` | يتم تلقائياً بعد الحفظ |
+| Vercel crash عند بدء التشغيل | كان supabase.ts يرمي خطأ | تم الإصلاح: stub آمن |
+| Session لا تُحفظ | DB غير متصل | راجع `DATABASE_URL` في Vercel env vars |
+| Social links لا تظهر | `social_links` غير محفوظ في DB | اضبطها من AdminSettings → تبويب السوشيال |
+| Feature flags لا تعمل | `feature_flags` setting فارغ | ابذرها من API أو AdminSettings |
+| Payment لا يعمل | Paymob غير مُفعَّل | تحقق من payment_settings في لوحة التحكم |
+| Track لا يُرجع نتائج | phone غير مطابق | تأكد من نفس الصيغة عند التبرع |
 
 ---
 
 ## 📝 ملاحظات للوكيل الذكي
 
-- **لا تغيّر** أنواع الـ ID في قاعدة البيانات (serial ↔ varchar)
+- **لا تغيّر** أنواع الـ ID في قاعدة البيانات (serial ↔ varchar) — يكسر البيانات الموجودة
 - **الـ TypeScript errors** من نوع TS2305 قبل الوقت — esbuild يتجاهلها
 - **الـ PORT**: يُقرأ من `process.env.PORT` أو `8080` افتراضياً
-- **الـ Sessions** تستخدم PostgreSQL المحلي، ليس Supabase
-- أي تعديل على Settings يجب أن يستخدم مفتاح `key` صحيح في جدول `settings`
+- **لا تستخدم Supabase** — supabase.ts أصبح stub لا يتصل بأي شيء
+- أي تعديل على Settings يجب PUT إلى `/api/settings/:key` مع body `{ value: ... }`
+- **api/handler.mjs لا يُرفع** — Vercel يبنيه تلقائياً من المصدر عند كل deploy
+- **الـ GitHub integration** متصل ويمكن استخدامه لدفع commits عبر GitHub API
+
+---
+
+## 🔄 سجل التغييرات (Changelog)
+
+### أبريل 2026 — تحديث شامل
+- **إصلاح الجلسة على Vercel**: `connect-pg-simple` كان يقرأ `table.sql` عبر `__dirname` غير المعرَّف في ESM bundles. الإصلاح: إنشاء جدول `user_sessions` يدوياً عبر `pg.Pool` وتعيين `createTableIfMissing: false`.
+- **AuthContext**: إضافة تمييز بين خطأ 401 (مسح الجلسة) وأخطاء الشبكة (الاحتفاظ بالـ cache).
+- **SplashScreen**: animation احترافي بتأثيرات ذهبية، شريط تقدم، ونبضة الشعار.
+- **HomeBanners**: StaticPaymentBanner يقرأ طرق الدفع من `/api/settings/payment_methods` ديناميكياً مع شريط متحرك.
+- **TopBar + Footer**: إضافة أيقونات TikTok و LinkedIn كـ SVG.
+- **DonationModal**: إضافة USSD deep links لأورنج كاش (`*8*`) واتصالات كاش (`*600*`).
+
+### نقطة مهمة للـ Vercel
+```typescript
+// ❌ خطأ — يحاول قراءة table.sql عبر __dirname في ESM bundle
+new PgSession({ conString: DB_URL, createTableIfMissing: true })
+
+// ✅ صح — إنشاء الجدول يدوياً
+const pool = new Pool({ connectionString: DB_URL });
+await pool.query(`CREATE TABLE IF NOT EXISTS "user_sessions" (...)`);
+new PgSession({ pool, createTableIfMissing: false })
+```
