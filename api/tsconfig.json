@@ -2,7 +2,8 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../dist/api",
-    "types": ["node"],
+    "noEmitOnError": false,
+    "skipLibCheck": true,
     "paths": {
       "@workspace/db":        ["../lib/db/src/index.ts"],
       "@workspace/db/*":      ["../lib/db/src/*"],
