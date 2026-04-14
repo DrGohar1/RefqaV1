@@ -1,17 +1,17 @@
 {
   "version": 2,
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm --filter @workspace/rafaqaa-website run build && mkdir -p vercel-output && cp -r artifacts/rafaqaa-website/dist/. vercel-output/",
+  "buildCommand": "pnpm --filter @workspace/rafaqaa-website run build && mkdir -p vercel-output && cp -r artifacts/rafaqaa-website/dist/. vercel-output/ && node api/build-for-vercel.mjs",
   "outputDirectory": "vercel-output",
   "framework": null,
   "functions": {
-    "api/index.ts": {
+    "api-built/index.mjs": {
       "memory": 512,
       "maxDuration": 30
     }
   },
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/api/:path*", "destination": "/api-built/index" },
     { "source": "/((?!api).*)", "destination": "/index.html" }
   ],
   "headers": [
