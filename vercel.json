@@ -1,7 +1,7 @@
 {
   "version": 2,
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "REPO=$(git rev-parse --show-toplevel) && pnpm --filter @workspace/rafaqaa-website run build && mkdir -p vercel-output && cp -r $REPO/artifacts/rafaqaa-website/dist/. vercel-output/",
+  "buildCommand": "pnpm --filter @workspace/rafaqaa-website run build && mkdir -p vercel-output && cp -r artifacts/rafaqaa-website/dist/. vercel-output/",
   "outputDirectory": "vercel-output",
   "framework": null,
   "functions": {
