@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دليل النشر — رفقاء البررة</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f8fafc; color: #1e293b; direction: rtl; font-size: 14px; }
+  .page { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
+  
+  /* Header */
+  .header { background: linear-gradient(135deg, #0f4c35, #10B981); color: white; padding: 35px; border-radius: 16px; margin-bottom: 30px; display: flex; align-items: center; gap: 20px; }
+  .header-icon { font-size: 50px; }
+  .header h1 { font-size: 28px; font-weight: 800; margin-bottom: 5px; }
+  .header p { font-size: 13px; opacity: 0.85; }
+  .header .date { margin-top: 10px; font-size: 12px; opacity: 0.7; background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; display: inline-block; }
+  
+  /* Sections */
+  .section { background: white; border-radius: 14px; border: 1px solid #e2e8f0; padding: 25px; margin-bottom: 22px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #f1f5f9; }
+  .section-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .icon-blue { background: #dbeafe; }
+  .icon-green { background: #dcfce7; }
+  .icon-amber { background: #fef3c7; }
+  .icon-purple { background: #ede9fe; }
+  .icon-red { background: #fee2e2; }
+  .icon-gray { background: #f1f5f9; }
+  .section h2 { font-size: 17px; font-weight: 700; color: #0f172a; }
+  .section p.subtitle { font-size: 12px; color: #64748b; margin-top: 2px; }
+  
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8fafc; text-align: right; padding: 10px 14px; font-weight: 700; color: #374151; border-bottom: 2px solid #e5e7eb; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #374151; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+  
+  /* Credential boxes */
+  .cred-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .cred-box .label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .cred-box .value { font-family: 'Courier New', monospace; font-size: 16px; font-weight: 700; color: #0f172a; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; display: inline-block; letter-spacing: 1px; }
+  
+  /* User cards */
+  .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+  .user-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 18px; background: white; transition: box-shadow 0.2s; }
+  .user-card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+  .user-card .avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: white; margin-bottom: 12px; }
+  .avatar-admin { background: linear-gradient(135deg, #10B981, #059669); }
+  .avatar-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+  .avatar-green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .avatar-gray { background: linear-gradient(135deg, #94a3b8, #64748b); }
+  .user-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  .user-card .field { margin-bottom: 6px; }
+  .user-card .field-label { font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .user-card .field-value { font-family: 'Courier New', monospace; font-size: 13px; font-weight: 700; color: #0f172a; background: #f8fafc; padding: 4px 8px; border-radius: 5px; margin-top: 2px; display: block; }
+  .role-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 8px; }
+  .badge-admin { background: #dcfce7; color: #166534; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-gray { background: #f1f5f9; color: #374151; }
+  
+  /* Env vars */
+  .env-block { background: #1e293b; color: #e2e8f0; border-radius: 10px; padding: 18px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 2; margin-bottom: 14px; overflow-x: auto; }
+  .env-block .comment { color: #64748b; }
+  .env-block .key { color: #60a5fa; font-weight: 700; }
+  .env-block .value { color: #4ade80; }
+  .env-block .required-badge { background: #ef4444; color: white; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-right: 8px; font-family: sans-serif; }
+  .env-block .optional-badge { background: #f59e0b; color: white; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-right: 8px; font-family: sans-serif; }
+  
+  /* Steps */
+  .steps { counter-reset: step; }
+  .step { display: flex; gap: 15px; margin-bottom: 18px; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #10B981, #059669); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; }
+  .step-content { flex: 1; }
+  .step-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+  .step-content p, .step-content li { font-size: 13px; color: #4b5563; line-height: 1.6; }
+  .step-content ul { padding-right: 16px; margin-top: 5px; }
+  .step-content code { background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-family: monospace; font-size: 12px; color: #0f172a; border: 1px solid #e2e8f0; }
+  
+  /* Highlight boxes */
+  .info-box { padding: 14px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 13px; }
+  .info-green { background: #f0fdf4; border-right: 4px solid #10B981; color: #166534; }
+  .info-blue { background: #eff6ff; border-right: 4px solid #3b82f6; color: #1d4ed8; }
+  .info-amber { background: #fffbeb; border-right: 4px solid #f59e0b; color: #92400e; }
+  .info-red { background: #fef2f2; border-right: 4px solid #ef4444; color: #991b1b; }
+  
+  /* API table */
+  .method { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; font-family: monospace; }
+  .get { background: #dbeafe; color: #1d4ed8; }
+  .post { background: #dcfce7; color: #166534; }
+  .patch { background: #fef3c7; color: #92400e; }
+  .delete { background: #fee2e2; color: #991b1b; }
+  .endpoint { font-family: monospace; font-size: 12px; color: #374151; }
+  
+  /* Footer */
+  .footer { text-align: center; padding: 30px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; margin-top: 30px; }
+  .footer strong { color: #10B981; }
+  
+  @media print {
+    body { background: white; }
+    .page { padding: 15px; }
+    .section { break-inside: avoid; }
+  }
+  
+  .watermark { position: fixed; bottom: 20px; left: 20px; font-size: 11px; color: #cbd5e1; transform: rotate(-15deg); pointer-events: none; z-index: -1; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">🌿</div>
+  <div>
+    <h1>دليل النشر الكامل — مؤسسة رفقاء البررة</h1>
+    <p>منظومة التبرع الرقمية · هذا المستند سري ويحتوي على بيانات حساسة</p>
+    <span class="date">📅 تاريخ الإصدار: مارس 2025 | الإصدار 2.0</span>
+  </div>
+</div>
+
+<!-- SECTION 1: PROJECT OVERVIEW -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-green">📦</div>
+    <div>
+      <h2>نظرة عامة على المشروع</h2>
+      <p class="subtitle">Tech Stack والمعمارية العامة</p>
+    </div>
+  </div>
+  <table>
+    <tr><th style="width:200px">العنصر</th><th>التفاصيل</th></tr>
+    <tr><td><strong>اسم المشروع</strong></td><td>مؤسسة رفقاء البررة للتنمية الاجتماعية</td></tr>
+    <tr><td><strong>نوع المشروع</strong></td><td>موقع تبرع خيري متكامل (pnpm Monorepo)</td></tr>
+    <tr><td><strong>Frontend</strong></td><td>React 18 + Vite + TypeScript + Tailwind CSS v4</td></tr>
+    <tr><td><strong>Backend</strong></td><td>Express.js 5 + TypeScript + Drizzle ORM</td></tr>
+    <tr><td><strong>قاعدة بيانات الأعمال</strong></td><td>Supabase PostgreSQL (حملات، تبرعات، إعدادات)</td></tr>
+    <tr><td><strong>قاعدة بيانات الإدارة</strong></td><td>Local PostgreSQL (مستخدمون، صلاحيات، بانرات، مناديب)</td></tr>
+    <tr><td><strong>الاستضافة المقترحة</strong></td><td>Vercel (Frontend) + Railway/Render (Backend)</td></tr>
+    <tr><td><strong>بوابة الدفع</strong></td><td>Paymob (فيزا، فوري، محافظ إلكترونية)</td></tr>
+    <tr><td><strong>رفع الملفات</strong></td><td>Supabase Storage (إيصالات التبرع)</td></tr>
+    <tr><td><strong>اللغة</strong></td><td>عربي — RTL — Tajawal + Amiri Fonts</td></tr>
+  </table>
+</div>
+
+<!-- SECTION 2: ADMIN USERS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-blue">👥</div>
+    <div>
+      <h2>مستخدمو لوحة التحكم</h2>
+      <p class="subtitle">بيانات الدخول للإدارة — يرجى تغيير كلمات المرور فور الدخول الأول</p>
+    </div>
+  </div>
+  
+  <div class="info-red" style="margin-bottom:20px">
+    ⚠️ <strong>تنبيه أمني:</strong> هذه كلمات المرور الافتراضية. يجب تغييرها فوراً بعد أول تسجيل دخول من صفحة الإدارة.
+  </div>
+  
+  <div class="user-grid">
+    <div class="user-card">
+      <div class="avatar avatar-admin">م</div>
+      <h4>المدير الرئيسي</h4>
+      <div class="field"><span class="field-label">اسم المستخدم</span><span class="field-value">admin</span></div>
+      <div class="field"><span class="field-label">كلمة المرور</span><span class="field-value">admin123</span></div>
+      <div class="field"><span class="field-label">البريد الإلكتروني</span><span class="field-value">admin@rafaqaa.org</span></div>
+      <span class="role-badge badge-admin">🔑 مدير كامل الصلاحيات</span>
+    </div>
+    <div class="user-card">
+      <div class="avatar avatar-blue">ش</div>
+      <h4>المشرف العام</h4>
+      <div class="field"><span class="field-label">اسم المستخدم</span><span class="field-value">supervisor</span></div>
+      <div class="field"><span class="field-label">كلمة المرور</span><span class="field-value">Rafaqaa@Sup2025</span></div>
+      <div class="field"><span class="field-label">الصلاحيات</span><span class="field-value">حملات، تبرعات، بانرات</span></div>
+      <span class="role-badge badge-blue">📊 مشرف</span>
+    </div>
+    <div class="user-card">
+      <div class="avatar avatar-green">د</div>
+      <h4>موظف إدخال البيانات</h4>
+      <div class="field"><span class="field-label">اسم المستخدم</span><span class="field-value">data_entry</span></div>
+      <div class="field"><span class="field-label">كلمة المرور</span><span class="field-value">Rafaqaa@Data2025</span></div>
+      <div class="field"><span class="field-label">الصلاحيات</span><span class="field-value">إدخال وقبول التبرعات</span></div>
+      <span class="role-badge badge-green">✏️ إدخال بيانات</span>
+    </div>
+    <div class="user-card">
+      <div class="avatar avatar-gray">م</div>
+      <h4>مراقب التقارير</h4>
+      <div class="field"><span class="field-label">اسم المستخدم</span><span class="field-value">viewer</span></div>
+      <div class="field"><span class="field-label">كلمة المرور</span><span class="field-value">Rafaqaa@View2025</span></div>
+      <div class="field"><span class="field-label">الصلاحيات</span><span class="field-value">قراءة التقارير فقط</span></div>
+      <span class="role-badge badge-gray">👁️ مشاهد</span>
+    </div>
+  </div>
+  
+  <div class="info-blue" style="margin-top:20px">
+    🔗 رابط لوحة التحكم: <strong>https://yourdomain.com/admin</strong>
+  </div>
+</div>
+
+<!-- SECTION 3: ENVIRONMENT VARIABLES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-amber">⚙️</div>
+    <div>
+      <h2>متغيرات البيئة (Environment Variables)</h2>
+      <p class="subtitle">يجب إضافتها في Vercel و Railway/Render</p>
+    </div>
+  </div>
+  
+  <div class="info-amber">
+    ⚡ المتغيرات المحددة بـ REQUIRED يجب إضافتها حتماً. Optional لتفعيل ميزات إضافية.
+  </div>
+  
+  <br>
+  
+  <div class="env-block">
+<span class="comment"># ══════ Supabase (قاعدة بيانات الأعمال) ══════</span>
+<span class="required-badge">REQUIRED</span><span class="key">VITE_SUPABASE_URL</span>=<span class="value">https://your-project.supabase.co</span>
+<span class="required-badge">REQUIRED</span><span class="key">VITE_SUPABASE_ANON_KEY</span>=<span class="value">eyJhbGci...your-anon-key</span>
+
+<span class="comment"># ══════ قاعدة البيانات المحلية (لوحة الإدارة) ══════</span>
+<span class="required-badge">REQUIRED</span><span class="key">DATABASE_URL</span>=<span class="value">postgresql://user:pass@host:5432/rafaqaa_admin</span>
+
+<span class="comment"># ══════ الجلسات ══════</span>
+<span class="required-badge">REQUIRED</span><span class="key">SESSION_SECRET</span>=<span class="value">your-super-secret-random-string-min-32-chars</span>
+
+<span class="comment"># ══════ Paymob (الدفع الإلكتروني) ══════</span>
+<span class="optional-badge">OPTIONAL</span><span class="key">PAYMOB_API_KEY</span>=<span class="value">your-paymob-api-key</span>
+<span class="optional-badge">OPTIONAL</span><span class="key">PAYMOB_CARD_INTEGRATION_ID</span>=<span class="value">123456</span>
+<span class="optional-badge">OPTIONAL</span><span class="key">PAYMOB_CARD_IFRAME_ID</span>=<span class="value">789012</span>
+<span class="optional-badge">OPTIONAL</span><span class="key">PAYMOB_WALLET_INTEGRATION_ID</span>=<span class="value">345678</span>
+<span class="optional-badge">OPTIONAL</span><span class="key">PAYMOB_WALLET_IFRAME_ID</span>=<span class="value">901234</span>
+
+<span class="comment"># ══════ بيئة التشغيل ══════</span>
+<span class="required-badge">REQUIRED</span><span class="key">NODE_ENV</span>=<span class="value">production</span>
+<span class="required-badge">REQUIRED</span><span class="key">PORT</span>=<span class="value">8080</span>
+  </div>
+</div>
+
+<!-- SECTION 4: GITHUB SETUP -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-gray">🐙</div>
+    <div>
+      <h2>إعداد GitHub Repository</h2>
+      <p class="subtitle">رفع الكود ورفع التحديثات</p>
+    </div>
+  </div>
+  
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>إنشاء ريبو جديد على GitHub</h4>
+        <p>اذهب إلى <a href="https://github.com/new">github.com/new</a> وأنشئ ريبو باسم <code>rafaqaa-website</code></p>
+        <ul>
+          <li>اختر <strong>Private</strong> للحفاظ على سرية الكود</li>
+          <li>لا تضيف README أو .gitignore (الكود جاهز)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>إنشاء Personal Access Token</h4>
+        <p>اذهب إلى GitHub Settings → Developer Settings → Personal Access Tokens → Generate New Token</p>
+        <ul>
+          <li>اختر صلاحية <code>repo</code> (كاملة)</li>
+          <li>احفظ التوكن في مكان آمن</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>ربط Replit بـ GitHub ورفع الكود</h4>
+        <p>في Replit، من نافذة الـ Version Control اختر "Connect to GitHub" أو استخدم الأوامر:</p>
+        <p><code>git remote add origin https://YOUR_TOKEN@github.com/USERNAME/rafaqaa-website.git</code></p>
+        <p><code>git push -u origin main</code></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>إعداد GitHub Secrets (للـ CI/CD)</h4>
+        <ul>
+          <li>Settings → Secrets and Variables → Actions</li>
+          <li>أضف جميع متغيرات البيئة كـ Secrets</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: VERCEL DEPLOYMENT -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-purple">▲</div>
+    <div>
+      <h2>نشر الموقع على Vercel</h2>
+      <p class="subtitle">ربط GitHub بـ Vercel للنشر التلقائي</p>
+    </div>
+  </div>
+  
+  <div class="info-blue">
+    💡 Vercel مناسب للـ Frontend فقط. الـ API Server (Express.js) يحتاج خادم منفصل مثل Railway أو Render.
+  </div>
+  <br>
+  
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>إنشاء حساب Vercel</h4>
+        <p>اذهب إلى <a href="https://vercel.com">vercel.com</a> وسجّل بحسابك على GitHub مباشرة</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Import المشروع</h4>
+        <ul>
+          <li>New Project → Import Git Repository</li>
+          <li>اختر ريبو <code>rafaqaa-website</code></li>
+          <li>Root Directory: <code>artifacts/rafaqaa-website</code></li>
+          <li>Framework Preset: <strong>Vite</strong></li>
+          <li>Build Command: <code>pnpm build</code></li>
+          <li>Output Directory: <code>dist</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>إضافة Environment Variables في Vercel</h4>
+        <ul>
+          <li>Project Settings → Environment Variables</li>
+          <li>أضف: VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY</li>
+          <li>أضف: VITE_API_BASE_URL = رابط الـ API Server</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>ربط الدومين الرسمي</h4>
+        <ul>
+          <li>Project Settings → Domains → Add Domain</li>
+          <li>أضف <code>rafaqaa.org</code> أو دومينك الرسمي</li>
+          <li>Vercel سيعطيك CNAME أو A Record تضيفه في DNS</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: BACKEND (API Server) ON RAILWAY -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-green">🚂</div>
+    <div>
+      <h2>نشر الـ API Server على Railway</h2>
+      <p class="subtitle">الخادم الخلفي (Express.js + PostgreSQL)</p>
+    </div>
+  </div>
+  
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>إنشاء حساب Railway</h4>
+        <p>اذهب إلى <a href="https://railway.app">railway.app</a> → New Project → Deploy from GitHub</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>إعداد المشروع</h4>
+        <ul>
+          <li>Root Directory: <code>artifacts/api-server</code></li>
+          <li>Build Command: <code>pnpm run build</code></li>
+          <li>Start Command: <code>node dist/index.mjs</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>إضافة قاعدة البيانات</h4>
+        <ul>
+          <li>في Railway: New → Database → PostgreSQL</li>
+          <li>انسخ DATABASE_URL وأضفها كـ Environment Variable</li>
+          <li>شغّل: <code>pnpm --filter @workspace/db push</code> لإنشاء الجداول</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>أضف جميع Environment Variables</h4>
+        <p>أضف كل المتغيرات المذكورة في قسم "متغيرات البيئة" أعلاه</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: SUPABASE -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-green">⚡</div>
+    <div>
+      <h2>إعداد Supabase</h2>
+      <p class="subtitle">قاعدة بيانات الأعمال (حملات، تبرعات، إعدادات)</p>
+    </div>
+  </div>
+  
+  <table>
+    <tr><th>الجدول</th><th>المحتوى</th><th>ملاحظات</th></tr>
+    <tr><td><code>campaigns</code></td><td>الحملات الخيرية</td><td>title, goal_amount, raised_amount, status</td></tr>
+    <tr><td><code>donations</code></td><td>سجل التبرعات</td><td>donor_name, amount, payment_method, status</td></tr>
+    <tr><td><code>settings</code></td><td>إعدادات الموقع</td><td>key-value store</td></tr>
+    <tr><td><code>audit_logs</code></td><td>سجل العمليات</td><td>تتبع تغييرات الإدارة</td></tr>
+    <tr><td><code>payment_methods</code></td><td>وسائل الدفع</td><td>محافظ، بنوك، انستاباي</td></tr>
+    <tr><td><code>success_stories</code></td><td>قصص النجاح</td><td>للعرض في الموقع</td></tr>
+  </table>
+  
+  <br>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>الحصول على بيانات Supabase</h4>
+        <p>اذهب إلى Supabase Dashboard → Settings → API</p>
+        <ul>
+          <li><strong>Project URL</strong> = VITE_SUPABASE_URL</li>
+          <li><strong>anon/public key</strong> = VITE_SUPABASE_ANON_KEY</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>إعداد Storage للإيصالات</h4>
+        <ul>
+          <li>Storage → New Bucket → اسمه: <code>receipts</code></li>
+          <li>اجعله Public للقراءة</li>
+          <li>أضف Policy للـ insert للجميع (للرفع)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 8: PAYMOB -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-amber">💳</div>
+    <div>
+      <h2>إعداد Paymob (الدفع الإلكتروني)</h2>
+      <p class="subtitle">بوابة الدفع الأكثر انتشاراً في مصر</p>
+    </div>
+  </div>
+  
+  <div class="info-green">
+    ✅ النظام مبرمج بالكامل لـ Paymob. كل ما تحتاجه هو الحصول على API Keys من حسابك.
+  </div>
+  <br>
+  
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>إنشاء حساب Paymob</h4>
+        <p>اذهب إلى <a href="https://accept.paymob.com">accept.paymob.com</a> → Sign Up كـ Merchant</p>
+        <ul>
+          <li>ستحتاج: السجل التجاري للمؤسسة / البطاقة الضريبية</li>
+          <li>المدة: 1-3 أيام عمل للتفعيل</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>إنشاء Integration</h4>
+        <ul>
+          <li>Dashboard → Integrations → Add Integration</li>
+          <li>أنشئ Integration لـ Online Card Payment → احفظ الـ Integration ID</li>
+          <li>أنشئ Integration أخرى لـ Mobile Wallet (اختياري)</li>
+          <li>من كل Integration → Create Iframe → احفظ الـ Iframe ID</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>الحصول على API Key</h4>
+        <ul>
+          <li>Settings → Account Info → API Key</li>
+          <li>انسخه وأضفه كـ PAYMOB_API_KEY في Environment Variables</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>إعداد Callback URL في Paymob</h4>
+        <ul>
+          <li>Settings → Webhooks/Notifications</li>
+          <li>Transaction Processed Callback: <code>https://your-api.com/api/payments/paymob/callback</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 9: API DOCS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-blue">🔌</div>
+    <div>
+      <h2>أهم نقاط الـ API</h2>
+      <p class="subtitle">Base URL: https://your-api.railway.app/api</p>
+    </div>
+  </div>
+  
+  <table>
+    <tr><th>الطريقة</th><th>المسار</th><th>الوصف</th><th>Auth؟</th></tr>
+    <tr>
+      <td><span class="method post">POST</span></td>
+      <td class="endpoint">/auth/login</td>
+      <td>تسجيل الدخول للإدارة</td>
+      <td>لا</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td class="endpoint">/campaigns</td>
+      <td>جلب الحملات الخيرية</td>
+      <td>لا</td>
+    </tr>
+    <tr>
+      <td><span class="method post">POST</span></td>
+      <td class="endpoint">/donations</td>
+      <td>تسجيل تبرع جديد</td>
+      <td>لا</td>
+    </tr>
+    <tr>
+      <td><span class="method patch">PATCH</span></td>
+      <td class="endpoint">/donations/:id</td>
+      <td>قبول / رفض تبرع</td>
+      <td>✅ نعم</td>
+    </tr>
+    <tr>
+      <td><span class="method post">POST</span></td>
+      <td class="endpoint">/payments/paymob/initiate</td>
+      <td>بدء عملية دفع أونلاين</td>
+      <td>لا</td>
+    </tr>
+    <tr>
+      <td><span class="method post">POST</span></td>
+      <td class="endpoint">/field-orders</td>
+      <td>طلب دفع منزلي</td>
+      <td>لا</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td class="endpoint">/agents</td>
+      <td>قائمة المناديب الميدانيين</td>
+      <td>✅ نعم</td>
+    </tr>
+    <tr>
+      <td><span class="method post">POST</span></td>
+      <td class="endpoint">/upload/receipt</td>
+      <td>رفع إيصال تبرع</td>
+      <td>لا</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td class="endpoint">/stats</td>
+      <td>إحصائيات عامة</td>
+      <td>لا</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td class="endpoint">/banners</td>
+      <td>البانرات الترويجية النشطة</td>
+      <td>لا</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td class="endpoint">/settings/:key</td>
+      <td>إعدادات الموقع</td>
+      <td>لا</td>
+    </tr>
+  </table>
+</div>
+
+<!-- SECTION 10: SECURITY CHECKLIST -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-red">🔒</div>
+    <div>
+      <h2>قائمة التحقق الأمني (يجب تنفيذها قبل الإطلاق)</h2>
+      <p class="subtitle">خطوات مطلوبة لأمان الموقع</p>
+    </div>
+  </div>
+  
+  <table>
+    <tr><th style="width:50px">✓</th><th>المهمة</th><th>الأولوية</th></tr>
+    <tr><td>□</td><td>تغيير كلمة مرور admin من admin123 لكلمة قوية</td><td>🔴 عاجل جداً</td></tr>
+    <tr><td>□</td><td>إعداد SESSION_SECRET بقيمة عشوائية قوية (+32 حرف)</td><td>🔴 عاجل جداً</td></tr>
+    <tr><td>□</td><td>تفعيل HTTPS على الدومين الرسمي</td><td>🔴 عاجل جداً</td></tr>
+    <tr><td>□</td><td>تفعيل 2FA على GitHub وVercel</td><td>🟡 مهم</td></tr>
+    <tr><td>□</td><td>إضافة CORS whitelist بالدومينات المسموح بها فقط</td><td>🟡 مهم</td></tr>
+    <tr><td>□</td><td>اختبار Paymob في وضع Sandbox قبل الإنتاج</td><td>🟡 مهم</td></tr>
+    <tr><td>□</td><td>إعداد نسخ احتياطية يومية لقواعد البيانات</td><td>🟢 قريباً</td></tr>
+    <tr><td>□</td><td>مراجعة Supabase Row Level Security (RLS)</td><td>🟢 قريباً</td></tr>
+  </table>
+</div>
+
+<!-- SECTION 11: FEATURES LIST -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-green">✨</div>
+    <div>
+      <h2>الميزات المبرمجة حالياً (v2.0)</h2>
+      <p class="subtitle">قائمة كاملة بجميع الوظائف الجاهزة</p>
+    </div>
+  </div>
+  
+  <table>
+    <tr><th>القسم</th><th>الميزة</th><th>الحالة</th></tr>
+    <tr><td>الموقع الأمامي</td><td>عرض الحملات الخيرية مع البار والشريط المتحرك</td><td>✅ جاهز</td></tr>
+    <tr><td>التبرع</td><td>4 طرق دفع: أونلاين / يدوي / منزلي / مندوب</td><td>✅ جاهز</td></tr>
+    <tr><td>التبرع</td><td>تحويل مباشر عبر انستاباي / فودافون كاش</td><td>✅ جاهز</td></tr>
+    <tr><td>التبرع</td><td>سلة تبرعات (تبرع لأكثر من حملة)</td><td>✅ جاهز</td></tr>
+    <tr><td>حاسبة الزكاة</td><td>حساب زكاة المال والتجارة</td><td>✅ جاهز</td></tr>
+    <tr><td>الإدارة</td><td>لوحة تحكم كاملة بصلاحيات متعددة</td><td>✅ جاهز</td></tr>
+    <tr><td>الإدارة</td><td>إدارة التبرعات (قبول/رفض/تعديل)</td><td>✅ جاهز</td></tr>
+    <tr><td>الإدارة</td><td>تعديل inline (Excel-style) للبيانات</td><td>✅ جاهز</td></tr>
+    <tr><td>الإدارة</td><td>ترقيم تسلسلي للتبرعات</td><td>✅ جاهز</td></tr>
+    <tr><td>الإدارة</td><td>إدارة المستخدمين والصلاحيات</td><td>✅ جاهز</td></tr>
+    <tr><td>الإدارة</td><td>نظام البانرات الترويجية (Carousel)</td><td>✅ جاهز</td></tr>
+    <tr><td>الإدارة</td><td>إحصائيات ولوحة analytics</td><td>✅ جاهز</td></tr>
+    <tr><td>المناديب</td><td>إدارة المناديب الميدانيين</td><td>✅ جاهز</td></tr>
+    <tr><td>المناديب</td><td>تتبع طلبات التحصيل المنزلي</td><td>✅ جاهز</td></tr>
+    <tr><td>المناديب</td><td>إشعار واتساب للمتبرعين</td><td>✅ جاهز</td></tr>
+    <tr><td>الدفع</td><td>Paymob — فيزا / فوري / محافظ إلكترونية</td><td>⏳ يحتاج API Key</td></tr>
+    <tr><td>الأمان</td><td>تشفير كلمات المرور (bcrypt)</td><td>✅ جاهز</td></tr>
+    <tr><td>الأمان</td><td>سجل العمليات (Audit Log)</td><td>✅ جاهز</td></tr>
+    <tr><td>SEO</td><td>وصف شامل وميتا داتا</td><td>✅ جاهز</td></tr>
+  </table>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>📄 دليل النشر الرسمي لمنظومة <strong>رفقاء البررة</strong> الرقمية v2.0</p>
+  <p style="margin-top:8px">هذا المستند سري — للإدارة الداخلية فقط</p>
+  <p style="margin-top:5px">🌐 للدعم التقني: تواصل مع مطور المشروع</p>
+</div>
+
+</div>
+
+<div class="watermark">CONFIDENTIAL · رفقاء البررة · 2025</div>
+
+</body>
+</html>
