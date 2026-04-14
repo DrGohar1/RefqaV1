@@ -52,6 +52,9 @@ export default function AdminAgents() {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [showCollectedEdit, setShowCollectedEdit] = useState<Agent | null>(null);
   const [newCollected, setNewCollected] = useState("");
+  const [allOrders, setAllOrders] = useState<FieldOrder[]>([]);
+  const [allOrdersLoading, setAllOrdersLoading] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>("pending");
 
   async function loadAgents() {
     setLoading(true);
@@ -67,7 +70,31 @@ export default function AdminAgents() {
     finally { setOrdersLoading(false); }
   }
 
-  useEffect(() => { loadAgents(); }, []);
+  async function loadAllOrders() {
+    setAllOrdersLoading(true);
+    try { setAllOrders(await api.get<FieldOrder[]>("/field-orders")); }
+    catch (e: any) { toast({ title: "خطأ", description: e.message, variant: "destructive" }); }
+    finally { setAllOrdersLoading(false); }
+  }
+
+  async function updateOrderStatus(orderId: string, status: string, agentId?: string) {
+    try {
+      const body: any = { status };
+      if (agentId) body.agent_id = agentId;
+      await api.patch(`/field-orders/${orderId}`, body);
+      toast({ title: status === "collected" ? "✅ تم تسجيل التحصيل" : status === "assigned" ? "✅ تم تعيين المندوب" : "تم التحديث" });
+      loadAllOrders();
+      if (selectedAgent) loadAgentOrders(selectedAgent.id);
+    } catch (e: any) { toast({ title: "خطأ", description: e.message, variant: "destructive" }); }
+  }
+
+  async function deleteOrder(id: string) {
+    if (!confirm("حذف هذا الطلب؟")) return;
+    try { await api.delete(`/field-orders/${id}`); toast({ title: "تم الحذف" }); loadAllOrders(); }
+    catch (e: any) { toast({ title: "خطأ", description: e.message, variant: "destructive" }); }
+  }
+
+  useEffect(() => { loadAgents(); loadAllOrders(); }, []);
   useEffect(() => { if (selectedAgent) loadAgentOrders(selectedAgent.id); }, [selectedAgent]);
 
   function openCreate() {
@@ -215,59 +242,96 @@ export default function AdminAgents() {
         {/* ─── TAB: FIELD ORDERS ─── */}
         {tab === "orders" && (
           <motion.div key="orders" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
-            {/* Agent selector */}
-            <div className="bg-card border border-border rounded-xl p-3">
-              <p className="text-sm font-medium mb-2 text-muted-foreground">اختر مندوباً لعرض طلباته:</p>
-              <div className="flex flex-wrap gap-2">
-                {agents.map(a => (
-                  <button key={a.id} onClick={() => setSelectedAgent(a)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${selectedAgent?.id === a.id ? "bg-primary text-white border-primary" : "bg-muted border-border hover:border-primary"}`}>
-                    {a.name}
-                  </button>
-                ))}
-              </div>
+            {/* Filter bar */}
+            <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted-foreground ml-1">الحالة:</span>
+              {[
+                { value: "pending", label: "معلقة", color: "bg-amber-100 text-amber-700 border-amber-200" },
+                { value: "assigned", label: "مُسنَدة", color: "bg-blue-100 text-blue-700 border-blue-200" },
+                { value: "collected", label: "محصّلة", color: "bg-green-100 text-green-700 border-green-200" },
+                { value: "cancelled", label: "ملغية", color: "bg-red-100 text-red-700 border-red-200" },
+                { value: "", label: "الكل", color: "bg-muted text-muted-foreground border-border" },
+              ].map(f => (
+                <button key={f.value} onClick={() => setFilterStatus(f.value)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${filterStatus === f.value ? f.color + " ring-2 ring-offset-1 ring-primary/30" : "bg-muted border-border text-muted-foreground hover:border-primary/40"}`}>
+                  {f.label} ({allOrders.filter(o => !f.value || o.status === f.value).length})
+                </button>
+              ))}
+              <Button variant="ghost" size="sm" className="gap-1 h-7 ml-auto" onClick={loadAllOrders}>
+                <RefreshCw className="w-3.5 h-3.5" />تحديث
+              </Button>
             </div>
 
-            {!selectedAgent ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <ClipboardList className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p>اختر مندوباً من الأعلى لعرض طلباته</p>
-              </div>
-            ) : ordersLoading ? (
-              <div className="animate-pulse space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-card rounded-xl" />)}</div>
-            ) : agentOrders.length === 0 ? (
+            {allOrdersLoading ? (
+              <div className="animate-pulse space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-card rounded-xl" />)}</div>
+            ) : allOrders.filter(o => !filterStatus || o.status === filterStatus).length === 0 ? (
               <div className="text-center py-12 text-muted-foreground bg-card rounded-xl border border-dashed">
                 <ClipboardList className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p>لا توجد طلبات لهذا المندوب</p>
+                <p>لا توجد طلبات بهذه الحالة</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">طلبات {selectedAgent.name} ({agentOrders.length} طلب)</p>
-                  <Button variant="ghost" size="sm" className="gap-1 h-8" onClick={() => loadAgentOrders(selectedAgent.id)}>
-                    <RefreshCw className="w-3.5 h-3.5" />تحديث
-                  </Button>
-                </div>
-                {agentOrders.map(o => {
+              <div className="space-y-2">
+                {allOrders.filter(o => !filterStatus || o.status === filterStatus).map(o => {
                   const st = statusMap[o.status] || { label: o.status, color: "bg-gray-100 text-gray-600", icon: Clock };
+                  const StIcon = st.icon;
                   return (
-                    <div key={o.id} className="bg-card border border-border rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
+                    <div key={o.id} className="bg-card border border-border rounded-xl p-3 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
                           <p className="font-bold text-sm">{o.donor_name}</p>
                           <p className="text-xs text-muted-foreground">{o.donor_phone}</p>
+                          <div className="text-xs text-muted-foreground flex flex-wrap gap-2 mt-1">
+                            {o.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{o.address}</span>}
+                            {o.zone && <span>{o.zone}</span>}
+                            {o.campaign_title && <span className="text-primary/70">{o.campaign_title}</span>}
+                            <span>{new Date(o.created_at).toLocaleDateString("ar-EG")}</span>
+                          </div>
+                          {o.agent_name && (
+                            <span className="inline-flex items-center gap-1 text-xs text-blue-600 mt-1">
+                              <UserCheck className="w-3 h-3" /> مُسنَد لـ: {o.agent_name}
+                            </span>
+                          )}
                         </div>
-                        <div className="text-left">
+                        <div className="flex flex-col items-end gap-1">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${st.color}`}>
-                            <st.icon className="w-3 h-3" />{st.label}
+                            <StIcon className="w-3 h-3" />{st.label}
                           </span>
-                          <p className="text-primary font-bold text-sm mt-1">{formatCurrency(o.amount)}</p>
+                          <p className="text-primary font-bold text-sm">{formatCurrency(o.amount)}</p>
                         </div>
                       </div>
-                      <div className="text-xs text-muted-foreground flex flex-wrap gap-3">
-                        {o.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{o.address}</span>}
-                        {o.campaign_title && <span>{o.campaign_title}</span>}
-                        <span>{new Date(o.created_at).toLocaleDateString("ar-EG")}</span>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-border/50">
+                        {o.status === "pending" && (
+                          <>
+                            <select
+                              onChange={e => { if (e.target.value) updateOrderStatus(o.id, "assigned", e.target.value); }}
+                              className="h-7 px-2 rounded-lg text-xs border border-border bg-background"
+                              defaultValue=""
+                            >
+                              <option value="">تعيين مندوب...</option>
+                              {agents.filter(a => a.is_active).map(a => (
+                                <option key={a.id} value={a.id}>{a.name}</option>
+                              ))}
+                            </select>
+                          </>
+                        )}
+                        {o.status === "assigned" && (
+                          <Button size="sm" className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700"
+                            onClick={() => updateOrderStatus(o.id, "collected")}>
+                            <CheckCircle2 className="w-3 h-3" />تم التحصيل
+                          </Button>
+                        )}
+                        {o.status !== "collected" && (
+                          <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-red-500 hover:text-red-700"
+                            onClick={() => updateOrderStatus(o.id, "cancelled")}>
+                            <AlertCircle className="w-3 h-3" />إلغاء
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-destructive ml-auto"
+                          onClick={() => deleteOrder(o.id)}>
+                          <Trash2 className="w-3 h-3" />حذف
+                        </Button>
                       </div>
                     </div>
                   );
