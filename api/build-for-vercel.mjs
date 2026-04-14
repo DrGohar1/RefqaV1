@@ -1,7 +1,6 @@
 /**
  * Pre-builds the API serverless function using esbuild.
- * Overwrites api/handler.mjs with a fully bundled ESM file
- * that Vercel can deploy as a serverless function.
+ * Creates a fully self-contained bundle (no runtime resolution issues).
  *
  * Run from repo root: node api/build-for-vercel.mjs
  */
@@ -12,7 +11,6 @@ import path from "path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 
-// Use esbuild from api-server's node_modules (always available after pnpm install)
 const require = createRequire(import.meta.url);
 const { build } = require(
   path.join(repoRoot, "artifacts/api-server/node_modules/esbuild")
@@ -25,9 +23,20 @@ await build({
   format: "esm",
   target: "node20",
   outfile: path.join(__dirname, "handler.mjs"),
-  packages: "external",
+  // Only externalize native addons and packages that can't be bundled
+  external: [
+    "*.node",
+    "pg-native",
+    "cpu-features",
+    "ssh2",
+    "fsevents",
+    "canvas",
+    "sharp",
+  ],
+  // Bundle everything else including workspace packages and node_modules
   tsconfig: path.join(__dirname, "tsconfig.json"),
   logLevel: "info",
+  minify: false,
 });
 
 console.log("✅ API bundle built → api/handler.mjs");
