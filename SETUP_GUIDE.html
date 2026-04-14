@@ -1,0 +1,1551 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>دليل تثبيت رفقاء البررة — خطوة بخطوة</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+        line-height: 1.7;
+      }
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d6a4f 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .header h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+      }
+      .header p {
+        opacity: 0.85;
+        font-size: 1rem;
+      }
+
+      /* TOC */
+      .toc {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+      }
+      .toc h3 {
+        font-size: 1rem;
+        color: #64748b;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 8px;
+      }
+      .toc ol {
+        padding-right: 20px;
+      }
+      .toc li {
+        margin: 6px 0;
+      }
+      .toc a {
+        color: #2563eb;
+        text-decoration: none;
+        font-size: 0.95rem;
+      }
+      .toc a:hover {
+        text-decoration: underline;
+      }
+
+      /* Step */
+      .step {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        margin-bottom: 28px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+      .step-header {
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .step-num {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.1rem;
+        color: white;
+        flex-shrink: 0;
+      }
+      .step-title {
+      }
+      .step-title h2 {
+        font-size: 1.15rem;
+        color: #1e293b;
+      }
+      .step-title p {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 2px;
+      }
+      .step-body {
+        padding: 24px;
+      }
+
+      /* Colors */
+      .blue .step-num {
+        background: #2563eb;
+      }
+      .blue .step-header {
+        background: #eff6ff;
+      }
+      .green .step-num {
+        background: #16a34a;
+      }
+      .green .step-header {
+        background: #f0fdf4;
+      }
+      .purple .step-num {
+        background: #7c3aed;
+      }
+      .purple .step-header {
+        background: #faf5ff;
+      }
+      .amber .step-num {
+        background: #d97706;
+      }
+      .amber .step-header {
+        background: #fffbeb;
+      }
+      .red .step-num {
+        background: #dc2626;
+      }
+      .red .step-header {
+        background: #fef2f2;
+      }
+      .teal .step-num {
+        background: #0d9488;
+      }
+      .teal .step-header {
+        background: #f0fdfa;
+      }
+      .emerald .step-num {
+        background: #059669;
+      }
+      .emerald .step-header {
+        background: #ecfdf5;
+      }
+      .sky .step-num {
+        background: #0284c7;
+      }
+      .sky .step-header {
+        background: #f0f9ff;
+      }
+
+      /* Boxes */
+      .info-box {
+        border-radius: 10px;
+        padding: 16px;
+        margin: 16px 0;
+        font-size: 0.9rem;
+        border: 1px solid;
+      }
+      .info-box.blue {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1e40af;
+      }
+      .info-box.green {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+        color: #166534;
+      }
+      .info-box.amber {
+        background: #fffbeb;
+        border-color: #fde68a;
+        color: #92400e;
+      }
+      .info-box.red {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #991b1b;
+      }
+      .info-box.gray {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        color: #475569;
+      }
+      .info-box strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.95rem;
+      }
+
+      /* Code */
+      .code-block {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        font-family: "Courier New", monospace;
+        font-size: 0.85rem;
+        margin: 12px 0;
+        overflow-x: auto;
+        line-height: 1.6;
+      }
+      .code-block .comment {
+        color: #94a3b8;
+      }
+      .code-block .key {
+        color: #7dd3fc;
+      }
+      .code-block .val {
+        color: #86efac;
+      }
+
+      /* UI Mock */
+      .ui-mock {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 16px 0;
+        background: white;
+      }
+      .ui-mock .browser-bar {
+        background: #f1f5f9;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .ui-mock .browser-bar .dots {
+        display: flex;
+        gap: 5px;
+      }
+      .ui-mock .browser-bar .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .ui-mock .browser-bar .dot.red {
+        background: #ef4444;
+      }
+      .ui-mock .browser-bar .dot.yellow {
+        background: #f59e0b;
+      }
+      .ui-mock .browser-bar .dot.green {
+        background: #22c55e;
+      }
+      .ui-mock .browser-bar .url {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 3px 10px;
+        font-size: 0.8rem;
+        color: #475569;
+        flex: 1;
+        text-align: right;
+        direction: ltr;
+      }
+      .ui-mock .content {
+        padding: 20px;
+      }
+
+      /* Wizard mock */
+      .wizard-step {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 8px 0;
+      }
+      .wizard-step.active {
+        background: #eff6ff;
+        border-color: #3b82f6;
+      }
+      .wizard-step.done {
+        background: #f0fdf4;
+        border-color: #22c55e;
+      }
+
+      /* Field mock */
+      .field-mock {
+        margin: 10px 0;
+      }
+      .field-mock label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #374151;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .field-mock input {
+        width: 100%;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        color: #6b7280;
+        background: #f9fafb;
+      }
+
+      /* Btn mock */
+      .btn-mock {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin: 8px 4px 0;
+      }
+      .btn-mock.success {
+        background: #16a34a;
+      }
+      .btn-mock.gray {
+        background: #6b7280;
+      }
+
+      /* Progress */
+      .progress {
+        display: flex;
+        gap: 4px;
+        margin: 12px 0;
+      }
+      .progress-step {
+        flex: 1;
+        height: 6px;
+        border-radius: 99px;
+      }
+      .progress-step.done {
+        background: #22c55e;
+      }
+      .progress-step.active {
+        background: #3b82f6;
+      }
+      .progress-step.todo {
+        background: #e2e8f0;
+      }
+
+      /* Checklist */
+      .checklist {
+        list-style: none;
+        space-y: 8px;
+      }
+      .checklist li {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+      }
+      .checklist li:last-child {
+        border: none;
+      }
+      .checklist .icon {
+        font-size: 1rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .checklist .req {
+        color: #dc2626;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: #fee2e2;
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+      .checklist .opt {
+        color: #16a34a;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: #dcfce7;
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+
+      /* Badge */
+      .badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .badge.free {
+        background: #dcfce7;
+        color: #15803d;
+      }
+      .badge.paid {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge.opt {
+        background: #f1f5f9;
+        color: #475569;
+      }
+
+      /* Table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0;
+        font-size: 0.88rem;
+      }
+      th {
+        background: #f8fafc;
+        padding: 8px 12px;
+        text-align: right;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-weight: 700;
+      }
+      td {
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+      }
+      tr:nth-child(even) td {
+        background: #f8fafc;
+      }
+
+      /* Number list */
+      .num-list {
+        list-style: none;
+        counter-reset: step-counter;
+      }
+      .num-list li {
+        counter-increment: step-counter;
+        display: flex;
+        gap: 12px;
+        margin: 10px 0;
+      }
+      .num-list li::before {
+        content: counter(step-counter);
+        width: 24px;
+        height: 24px;
+        background: #2563eb;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      /* Screenshot placeholder */
+      .screenshot {
+        border: 2px dashed #e2e8f0;
+        border-radius: 12px;
+        padding: 32px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin: 12px 0;
+        background: #f8fafc;
+      }
+
+      @media (max-width: 640px) {
+        .header h1 {
+          font-size: 1.4rem;
+        }
+        .step-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+      @media print {
+        .step {
+          break-inside: avoid;
+        }
+        body {
+          font-size: 13px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>🕌 دليل تثبيت موقع رفقاء البررة</h1>
+        <p>خطوة بخطوة — من الصفر حتى الإطلاق الكامل</p>
+        <p style="margin-top: 8px; opacity: 0.7; font-size: 0.85rem">
+          مؤسسة رفقاء البررة — إشهار 7932
+        </p>
+      </div>
+
+      <!-- TOC -->
+      <div class="toc">
+        <h3>📋 فهرس الخطوات</h3>
+        <ol>
+          <li><a href="#step1">المتطلبات والحسابات المطلوبة</a></li>
+          <li><a href="#step2">إنشاء قاعدة بيانات Supabase</a></li>
+          <li><a href="#step3">إنشاء قاعدة بيانات PostgreSQL</a></li>
+          <li><a href="#step4">رفع الكود على GitHub</a></li>
+          <li><a href="#step5">النشر على Vercel</a></li>
+          <li><a href="#step6">تشغيل معالج التثبيت (/install)</a></li>
+          <li><a href="#step7">إعداد Paymob (بوابة الدفع)</a></li>
+          <li><a href="#step8">إعداد Telegram Bot (إشعارات)</a></li>
+          <li><a href="#step9">اختبار الموقع</a></li>
+          <li><a href="#step10">قائمة التحقق النهائية</a></li>
+        </ol>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step1" class="step blue">
+        <div class="step-header">
+          <div class="step-num">1</div>
+          <div class="step-title">
+            <h2>المتطلبات والحسابات المطلوبة</h2>
+            <p>الحسابات والأدوات اللي محتاجها قبل أي حاجة</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <table>
+            <tr>
+              <th>الخدمة</th>
+              <th>الغرض</th>
+              <th>السعر</th>
+              <th>الرابط</th>
+            </tr>
+            <tr>
+              <td><strong>GitHub</strong></td>
+              <td>تخزين الكود</td>
+              <td><span class="badge free">مجاني</span></td>
+              <td>github.com</td>
+            </tr>
+            <tr>
+              <td><strong>Vercel</strong></td>
+              <td>نشر الموقع والسيرفر</td>
+              <td><span class="badge free">مجاني</span></td>
+              <td>vercel.com</td>
+            </tr>
+            <tr>
+              <td><strong>Supabase</strong></td>
+              <td>قاعدة بيانات التبرعات</td>
+              <td><span class="badge free">مجاني</span></td>
+              <td>supabase.com</td>
+            </tr>
+            <tr>
+              <td><strong>Neon.tech</strong></td>
+              <td>قاعدة بيانات الأدمن</td>
+              <td><span class="badge free">مجاني</span></td>
+              <td>neon.tech</td>
+            </tr>
+            <tr>
+              <td><strong>Paymob</strong></td>
+              <td>بوابة الدفع الإلكتروني</td>
+              <td><span class="badge opt">اختياري</span></td>
+              <td>paymob.com</td>
+            </tr>
+            <tr>
+              <td><strong>Telegram Bot</strong></td>
+              <td>إشعارات التبرعات</td>
+              <td><span class="badge free">مجاني</span></td>
+              <td>t.me/BotFather</td>
+            </tr>
+          </table>
+          <div class="info-box green">
+            <strong>✅ الخلاصة:</strong>
+            الموقع ممكن يشتغل بالكامل مجاناً 100% — فقط Paymob (بوابة الدفع
+            الإلكتروني) هو الحساب المدفوع الوحيد وهو اختياري.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step2" class="step green">
+        <div class="step-header">
+          <div class="step-num">2</div>
+          <div class="step-title">
+            <h2>إنشاء Supabase — قاعدة بيانات التبرعات</h2>
+            <p>هنا بتتخزن التبرعات والحملات والإعدادات — مجاني</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="num-list">
+            <li>
+              اذهب لـ <strong>supabase.com</strong> وسجّل دخول بحساب Google أو
+              GitHub
+            </li>
+            <li>
+              اضغط <strong>"New Project"</strong> — اختر اسم مثل "rafaqaa" وكلمة
+              مرور قوية
+            </li>
+            <li>انتظر دقيقة حتى ينشأ المشروع</li>
+            <li>اذهب لـ <strong>Settings → API</strong> من القائمة الجانبية</li>
+            <li>انسخ الثلاثة قيم التالية واحتفظ بها:</li>
+          </ul>
+
+          <div class="ui-mock">
+            <div class="browser-bar">
+              <div class="dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+              </div>
+              <div class="url">
+                supabase.com/dashboard/project/[project-id]/settings/api
+              </div>
+            </div>
+            <div class="content">
+              <div
+                style="
+                  background: #f8fafc;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 8px;
+                  padding: 16px;
+                  font-size: 0.85rem;
+                "
+              >
+                <div style="margin-bottom: 12px">
+                  <span style="color: #64748b; font-size: 0.75rem"
+                    >Project URL</span
+                  >
+                  <div
+                    style="
+                      background: #0f172a;
+                      color: #86efac;
+                      padding: 8px 12px;
+                      border-radius: 6px;
+                      font-family: monospace;
+                      margin-top: 4px;
+                    "
+                  >
+                    https://xxxxxxxxxxxxxxxx.supabase.co
+                  </div>
+                </div>
+                <div style="margin-bottom: 12px">
+                  <span style="color: #64748b; font-size: 0.75rem"
+                    >anon / public key</span
+                  >
+                  <div
+                    style="
+                      background: #0f172a;
+                      color: #7dd3fc;
+                      padding: 8px 12px;
+                      border-radius: 6px;
+                      font-family: monospace;
+                      margin-top: 4px;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey...
+                  </div>
+                </div>
+                <div>
+                  <span style="color: #64748b; font-size: 0.75rem"
+                    >service_role key
+                    <span
+                      style="
+                        background: #fee2e2;
+                        color: #991b1b;
+                        padding: 1px 6px;
+                        border-radius: 4px;
+                        font-size: 0.7rem;
+                      "
+                      >سري لا تشاركه</span
+                    ></span
+                  >
+                  <div
+                    style="
+                      background: #0f172a;
+                      color: #f87171;
+                      padding: 8px 12px;
+                      border-radius: 6px;
+                      font-family: monospace;
+                      margin-top: 4px;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box amber">
+            <strong>⚠️ لازم بعد كده تنشئ الجداول في Supabase:</strong>
+            اذهب لـ SQL Editor في Supabase وانسخ كود الجداول من ملف
+            <strong>HANDOVER.md</strong> (القسم 1.2) وشغّله.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step3" class="step purple">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <div class="step-title">
+            <h2>إنشاء PostgreSQL على Neon.tech — قاعدة بيانات الأدمن</h2>
+            <p>هنا بيتخزن حسابات الأدمن والجلسات — مجاني</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="num-list">
+            <li>اذهب لـ <strong>neon.tech</strong> وسجّل دخول</li>
+            <li>
+              اضغط <strong>"New Project"</strong> — اختر منطقة قريبة من مصر مثل
+              <strong>eu-central-1</strong>
+            </li>
+            <li>بعد الإنشاء، اضغط على <strong>"Connection Details"</strong></li>
+            <li>
+              انسخ <strong>Connection String</strong> — يبدأ بـ
+              <code>postgresql://</code>
+            </li>
+          </ul>
+
+          <div class="ui-mock">
+            <div class="browser-bar">
+              <div class="dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+              </div>
+              <div class="url">
+                console.neon.tech/app/projects/[project]/connection
+              </div>
+            </div>
+            <div class="content">
+              <div
+                style="
+                  background: #f8fafc;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 8px;
+                  padding: 16px;
+                  font-size: 0.85rem;
+                "
+              >
+                <span style="color: #64748b; font-size: 0.75rem"
+                  >Connection String (DATABASE_URL)</span
+                >
+                <div
+                  style="
+                    background: #0f172a;
+                    color: #86efac;
+                    padding: 10px 14px;
+                    border-radius: 6px;
+                    font-family: monospace;
+                    margin-top: 6px;
+                    font-size: 0.8rem;
+                  "
+                >
+                  postgresql://<span style="color: #7dd3fc">user</span>:<span
+                    style="color: #f87171"
+                    >password</span
+                  >@ep-xxx.eu-central-1.aws.neon.tech/<span
+                    style="color: #fbbf24"
+                    >dbname</span
+                  >?sslmode=require
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box blue">
+            <strong>💡 بديل:</strong> ممكن تستخدم
+            <strong>Vercel Postgres</strong> — بعد نشر الموقع على Vercel اذهب لـ
+            Storage → Create Database. هيديك نفس الـ DATABASE_URL تلقائياً.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step4" class="step teal">
+        <div class="step-header">
+          <div class="step-num">4</div>
+          <div class="step-title">
+            <h2>رفع الكود على GitHub</h2>
+            <p>شرط أساسي لنشر الموقع على Vercel</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="num-list">
+            <li>
+              اذهب لـ <strong>github.com/new</strong> وأنشئ repository جديد —
+              اسمه مثلاً <strong>rafaqaa-website</strong>
+            </li>
+            <li>افتح Terminal/Command Prompt في مجلد المشروع</li>
+            <li>شغّل الأوامر التالية:</li>
+          </ul>
+
+          <div class="code-block">
+            <span class="comment"># ربط المجلد بـ GitHub</span>
+            git init git remote add origin https://github.com/<span class="key"
+              >اسمك</span
+            >/rafaqaa-website.git
+
+            <span class="comment"># رفع الكود</span>
+            git add -A git commit -m "Initial deploy" git push -u origin main
+          </div>
+
+          <div class="info-box green">
+            <strong>✅ بعد الرفع:</strong> هتشوف كل الملفات على GitHub — جاهزين
+            للنشر.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step5" class="step amber">
+        <div class="step-header">
+          <div class="step-num">5</div>
+          <div class="step-title">
+            <h2>النشر على Vercel</h2>
+            <p>الموقع والسيرفر كلهم هينشروا على Vercel مجاناً</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="num-list">
+            <li>اذهب لـ <strong>vercel.com</strong> وسجّل دخول بحساب GitHub</li>
+            <li>اضغط <strong>"Add New → Project"</strong></li>
+            <li>اختر الـ repository اللي رفعته (rafaqaa-website)</li>
+            <li>
+              Vercel سيكتشف الإعدادات تلقائياً من ملف <code>vercel.json</code>
+            </li>
+            <li>اضغط <strong>"Deploy"</strong> وانتظر 2-3 دقائق</li>
+          </ul>
+
+          <div class="ui-mock">
+            <div class="browser-bar">
+              <div class="dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+              </div>
+              <div class="url">vercel.com/new</div>
+            </div>
+            <div class="content">
+              <div
+                style="
+                  border: 1px solid #e2e8f0;
+                  border-radius: 10px;
+                  padding: 16px;
+                  margin-bottom: 12px;
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                "
+              >
+                <div
+                  style="
+                    width: 36px;
+                    height: 36px;
+                    background: #0f172a;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 1.1rem;
+                  "
+                >
+                  ⬡
+                </div>
+                <div>
+                  <div style="font-weight: 600; font-size: 0.9rem">
+                    rafaqaa-website
+                  </div>
+                  <div style="font-size: 0.75rem; color: #64748b">
+                    github.com/yourname/rafaqaa-website
+                  </div>
+                </div>
+                <button
+                  class="btn-mock"
+                  style="margin: 0; margin-right: auto; padding: 6px 14px"
+                >
+                  Import
+                </button>
+              </div>
+              <div
+                style="
+                  background: #f8fafc;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 8px;
+                  padding: 12px;
+                  font-size: 0.8rem;
+                  color: #475569;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 6px;
+                  "
+                >
+                  <span>Framework:</span
+                  ><span style="color: #1e293b"
+                    >Other (vercel.json detected)</span
+                  >
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 6px;
+                  "
+                >
+                  <span>Build Command:</span
+                  ><span style="color: #1e293b; font-family: monospace"
+                    >pnpm --filter @workspace/rafaqaa-website run build</span
+                  >
+                </div>
+                <div style="display: flex; justify-content: space-between">
+                  <span>Output Directory:</span
+                  ><span style="color: #1e293b; font-family: monospace"
+                    >artifacts/rafaqaa-website/dist/public</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box amber">
+            <strong
+              >⚠️ مهم — إضافة Environment Variables قبل أو بعد Deploy:</strong
+            >
+            في Vercel → Project Settings → Environment Variables، أضف:
+          </div>
+          <table>
+            <tr>
+              <th>المتغير</th>
+              <th>القيمة</th>
+              <th>إلزامي؟</th>
+            </tr>
+            <tr>
+              <td><code>DATABASE_URL</code></td>
+              <td>رابط Neon أو Vercel Postgres</td>
+              <td>✅ مطلوب</td>
+            </tr>
+            <tr>
+              <td><code>SUPABASE_URL</code></td>
+              <td>من Supabase → Settings → API</td>
+              <td>✅ مطلوب</td>
+            </tr>
+            <tr>
+              <td><code>SUPABASE_ANON_KEY</code></td>
+              <td>من Supabase → Settings → API</td>
+              <td>✅ مطلوب</td>
+            </tr>
+            <tr>
+              <td><code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+              <td>من Supabase → Settings → API</td>
+              <td>✅ مطلوب</td>
+            </tr>
+            <tr>
+              <td><code>SESSION_SECRET</code></td>
+              <td>نص عشوائي طويل (32+ حرف)</td>
+              <td>✅ مطلوب</td>
+            </tr>
+            <tr>
+              <td><code>NODE_ENV</code></td>
+              <td>production</td>
+              <td>✅ مطلوب</td>
+            </tr>
+            <tr>
+              <td><code>PAYMOB_API_KEY</code></td>
+              <td>من حساب Paymob</td>
+              <td>اختياري</td>
+            </tr>
+            <tr>
+              <td><code>TELEGRAM_BOT_TOKEN</code></td>
+              <td>من @BotFather</td>
+              <td>اختياري</td>
+            </tr>
+            <tr>
+              <td><code>TELEGRAM_CHAT_ID</code></td>
+              <td>ID المجموعة/القناة</td>
+              <td>اختياري</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step6" class="step emerald">
+        <div class="step-header">
+          <div class="step-num">6</div>
+          <div class="step-title">
+            <h2>تشغيل معالج التثبيت — /install</h2>
+            <p>صفحة تفاعلية تعمل كل حاجة تلقائياً زي WordPress</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="num-list">
+            <li>
+              بعد نشر الموقع، افتح المتصفح وادخل على:
+              <code>https://موقعك.vercel.app/install</code>
+            </li>
+            <li>ستظهر صفحة المعالج (5 خطوات)</li>
+          </ul>
+
+          <div class="ui-mock">
+            <div class="browser-bar">
+              <div class="dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+              </div>
+              <div class="url">rafaqaa.vercel.app/install</div>
+            </div>
+            <div class="content">
+              <!-- Progress -->
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 8px;
+                  margin-bottom: 20px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 36px;
+                      border-radius: 50%;
+                      background: #22c55e;
+                      color: white;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: 700;
+                    "
+                  >
+                    ✓
+                  </div>
+                  <span
+                    style="font-size: 0.65rem; margin-top: 4px; color: #64748b"
+                    >PostgreSQL</span
+                  >
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    height: 3px;
+                    background: #22c55e;
+                    border-radius: 99px;
+                  "
+                ></div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 36px;
+                      border-radius: 50%;
+                      background: #3b82f6;
+                      color: white;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: 700;
+                    "
+                  >
+                    2
+                  </div>
+                  <span
+                    style="
+                      font-size: 0.65rem;
+                      margin-top: 4px;
+                      color: #3b82f6;
+                      font-weight: 600;
+                    "
+                    >Supabase</span
+                  >
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    height: 3px;
+                    background: #e2e8f0;
+                    border-radius: 99px;
+                  "
+                ></div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 36px;
+                      border-radius: 50%;
+                      border: 2px solid #e2e8f0;
+                      color: #94a3b8;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: 700;
+                    "
+                  >
+                    3
+                  </div>
+                  <span
+                    style="font-size: 0.65rem; margin-top: 4px; color: #94a3b8"
+                    >الأمان</span
+                  >
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    height: 3px;
+                    background: #e2e8f0;
+                    border-radius: 99px;
+                  "
+                ></div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 36px;
+                      border-radius: 50%;
+                      border: 2px solid #e2e8f0;
+                      color: #94a3b8;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: 700;
+                    "
+                  >
+                    4
+                  </div>
+                  <span
+                    style="font-size: 0.65rem; margin-top: 4px; color: #94a3b8"
+                    >الإضافات</span
+                  >
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    height: 3px;
+                    background: #e2e8f0;
+                    border-radius: 99px;
+                  "
+                ></div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 36px;
+                      border-radius: 50%;
+                      border: 2px solid #e2e8f0;
+                      color: #94a3b8;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: 700;
+                    "
+                  >
+                    5
+                  </div>
+                  <span
+                    style="font-size: 0.65rem; margin-top: 4px; color: #94a3b8"
+                    >تثبيت</span
+                  >
+                </div>
+              </div>
+              <!-- Current Step -->
+              <div
+                style="
+                  border: 1px solid #bfdbfe;
+                  border-radius: 10px;
+                  background: #eff6ff;
+                  padding: 16px;
+                "
+              >
+                <div
+                  style="font-weight: 700; margin-bottom: 12px; color: #1e40af"
+                >
+                  الخطوة 2 — Supabase
+                </div>
+                <div class="field-mock">
+                  <label>Project URL</label>
+                  <input value="https://xxxxxxxx.supabase.co" readonly />
+                </div>
+                <div class="field-mock">
+                  <label>Anon Key</label>
+                  <input value="eyJhbGci•••••••••••" readonly />
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    gap: 8px;
+                    margin-top: 12px;
+                    align-items: center;
+                  "
+                >
+                  <button
+                    class="btn-mock"
+                    style="
+                      margin: 0;
+                      background: #16a34a;
+                      padding: 7px 14px;
+                      font-size: 0.8rem;
+                    "
+                  >
+                    ⚡ اختبار الاتصال
+                  </button>
+                  <span
+                    style="font-size: 0.8rem; color: #16a34a; font-weight: 600"
+                    >✓ الاتصال بـ Supabase ناجح</span
+                  >
+                </div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-top: 12px;
+                "
+              >
+                <button
+                  class="btn-mock gray"
+                  style="margin: 0; padding: 7px 16px; font-size: 0.8rem"
+                >
+                  السابق
+                </button>
+                <button
+                  class="btn-mock"
+                  style="margin: 0; padding: 7px 16px; font-size: 0.8rem"
+                >
+                  التالي
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box green">
+            <strong>✅ بعد الخطوة 5 (التثبيت):</strong>
+            سيعمل المعالج تلقائياً على إنشاء جميع جداول قاعدة البيانات وإنشاء
+            حسابات الأدمن. ستظهر لك بيانات الدخول.
+          </div>
+
+          <div
+            style="
+              background: #0f172a;
+              color: #e2e8f0;
+              border-radius: 10px;
+              padding: 20px;
+              margin-top: 12px;
+            "
+          >
+            <div style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 8px">
+              بيانات الدخول الافتراضية (بعد التثبيت)
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid #1e293b;
+              "
+            >
+              <span style="color: #7dd3fc">admin</span>
+              <span style="color: #86efac">admin123</span>
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+              "
+            >
+              <span style="color: #7dd3fc">supervisor</span>
+              <span style="color: #86efac">Rafaqaa@Sup2025</span>
+            </div>
+            <div style="color: #f87171; font-size: 0.75rem; margin-top: 8px">
+              ⚠️ غيّر كلمات المرور فور تسجيل الدخول!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step7" class="step red">
+        <div class="step-header">
+          <div class="step-num">7</div>
+          <div class="step-title">
+            <h2>إعداد Paymob — بوابة الدفع الإلكتروني</h2>
+            <p>اختياري — للدفع بالبطاقات وفودافون كاش وإنستاباي</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="num-list">
+            <li>اذهب لـ <strong>accept.paymob.com</strong> وأنشئ حساب تاجر</li>
+            <li>اكتمل بيانات المؤسسة وانتظر الموافقة (1-3 أيام)</li>
+            <li>
+              بعد الموافقة، اذهب لـ <strong>Settings → Account Info</strong> →
+              انسخ <strong>API Key</strong>
+            </li>
+            <li>
+              اذهب لـ <strong>Payment Integrations</strong> → أنشئ Integration
+              للبطاقة وانسخ <strong>Integration ID + Iframe ID</strong>
+            </li>
+            <li>اذهب لـ <strong>Settings → Webhooks</strong> وأضف:</li>
+          </ul>
+          <div class="code-block">
+            <span class="comment"># Webhook URL في Paymob</span>
+            https://<span class="key">موقعك.vercel.app</span
+            >/api/payments/paymob/callback
+          </div>
+          <div class="info-box blue">
+            <strong>💡 لو Paymob مش جاهز:</strong>
+            الموقع يشتغل في وضع "Demo" — ممكن تأكد التبرعات يدوياً من لوحة
+            التحكم.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step8" class="step sky">
+        <div class="step-header">
+          <div class="step-num">8</div>
+          <div class="step-title">
+            <h2>إعداد Telegram Bot — إشعارات فورية</h2>
+            <p>مجاني — موصى به جداً — تاخد إشعار لكل تبرع على الفور</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="num-list">
+            <li>افتح Telegram وابحث عن <strong>@BotFather</strong></li>
+            <li>
+              أرسل <code>/newbot</code> ثم اختر اسماً مثل "رفقاء البررة Bot"
+            </li>
+            <li>
+              احفظ الـ <strong>Token</strong> الذي سيظهر (مثل:
+              <code>123456:ABC-DEF...</code>)
+            </li>
+            <li>أنشئ مجموعة أو قناة وأضف البوت إليها كـ Admin</li>
+            <li>لمعرفة Chat ID، أرسل رسالة في المجموعة ثم افتح:</li>
+          </ul>
+          <div class="code-block">
+            https://api.telegram.org/bot<span class="key">TOKEN</span
+            >/getUpdates
+
+            <span class="comment"># في الرد، ابحث عن:</span>
+            "chat": { "id": <span class="val">-1001234567890</span> }
+          </div>
+          <div class="info-box green">
+            <strong>بعدها:</strong> أضف TOKEN و Chat ID في معالج التثبيت
+            (/install) أو في الإعدادات من لوحة التحكم.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step9" class="step teal">
+        <div class="step-header">
+          <div class="step-num">9</div>
+          <div class="step-title">
+            <h2>اختبار الموقع</h2>
+            <p>تأكد من عمل كل حاجة قبل الإطلاق</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="checklist">
+            <li>
+              <span class="icon">🌐</span
+              ><span
+                >افتح الموقع —
+                <strong>هيظهر splash screen ثم الصفحة الرئيسية</strong></span
+              >
+            </li>
+            <li>
+              <span class="icon">📋</span
+              ><span>تحقق من ظهور الحملات في الصفحة الرئيسية</span>
+            </li>
+            <li>
+              <span class="icon">💰</span
+              ><span
+                >اضغط "تبرع الآن" على أي حملة وتأكد من ظهور Modal الدفع</span
+              >
+            </li>
+            <li>
+              <span class="icon">🔍</span
+              ><span
+                >افتح <code>/track</code> وجرّب بحث برقم تليفون أو Refqa
+                ID</span
+              >
+            </li>
+            <li>
+              <span class="icon">🔐</span
+              ><span>افتح <code>/auth</code> وسجّل دخول بـ admin/admin123</span>
+            </li>
+            <li>
+              <span class="icon">⚙️</span
+              ><span
+                >في لوحة التحكم، تحقق من ظهور قسم "التبرعات والمدفوعات"</span
+              >
+            </li>
+            <li>
+              <span class="icon">📬</span
+              ><span
+                >جرّب تبرعاً تجريبياً وأكّده من لوحة التحكم — تحقق من وصول إشعار
+                Telegram</span
+              >
+            </li>
+            <li>
+              <span class="icon">💳</span
+              ><span>لو Paymob مُعدّ — جرّب دفعاً ببطاقة اختبار</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────────── -->
+      <div id="step10" class="step emerald">
+        <div class="step-header">
+          <div class="step-num">10</div>
+          <div class="step-title">
+            <h2>قائمة التحقق النهائية قبل الإطلاق الرسمي</h2>
+            <p>لا تطلق الموقع قبل التحقق من هذه النقاط</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul class="checklist">
+            <li>
+              <span class="icon">☐</span
+              ><span>تم تشغيل معالج التثبيت <code>/install</code> بنجاح</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>تم تغيير كلمة مرور admin من الافتراضية</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>تم تغيير كلمة مرور supervisor من الافتراضية</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>تم إنشاء جداول Supabase (SQL Editor)</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>الموقع الرئيسي يفتح ويعرض الحملات</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>لوحة التحكم تفتح بعد تسجيل الدخول</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>تم إضافة حملات من لوحة التحكم</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>تم تحديث إعدادات الموقع (اسم المؤسسة، الواتساب، إلخ)</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span><span>Paymob Webhook مُعدّ ومختبر</span
+              ><span class="opt">اختياري</span>
+            </li>
+            <li>
+              <span class="icon">☐</span><span>Telegram Bot يستقبل إشعارات</span
+              ><span class="opt">اختياري</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>تم اختبار تبرع كامل من البداية للنهاية</span
+              ><span class="req">مطلوب</span>
+            </li>
+            <li>
+              <span class="icon">☐</span
+              ><span>تم إضافة الدومين المخصص في Vercel (لو متاح)</span
+              ><span class="opt">اختياري</span>
+            </li>
+          </ul>
+
+          <div class="info-box green" style="margin-top: 16px">
+            <strong>🚀 بعد اكتمال القائمة — موقعك جاهز 100%!</strong>
+            يمكنك الآن مشاركة الرابط مع الجمهور وبدء استقبال التبرعات.
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div
+        style="
+          text-align: center;
+          padding: 32px;
+          color: #94a3b8;
+          font-size: 0.85rem;
+        "
+      >
+        <p>مؤسسة رفقاء البررة — إشهار رقم 7932 — جيزة</p>
+        <p style="margin-top: 4px">
+          هذا الدليل سري — للاستخدام التقني الداخلي فقط
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
