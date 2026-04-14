@@ -5,10 +5,18 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadsDir = path.join(__dirname, "..", "..", "uploads", "receipts");
 
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+// On Vercel/serverless: use /tmp (writable). Locally: use uploads/ folder.
+const uploadsDir = process.env.NODE_ENV === "production" || process.env.VERCEL
+  ? "/tmp/uploads/receipts"
+  : path.join(__dirname, "..", "..", "uploads", "receipts");
+
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+} catch {
+  // Ignore if directory creation fails (e.g. read-only fs)
 }
 
 const storage = multer.diskStorage({
