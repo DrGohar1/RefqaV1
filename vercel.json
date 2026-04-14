@@ -1,28 +1,27 @@
 {
-    "version": 2,
-    "installCommand": "pnpm install --no-frozen-lockfile",
-    "buildCommand": "pnpm --filter @workspace/rafaqaa-website run build && mkdir -p vercel-output && cp -r artifacts/rafaqaa-website/dist/. vercel-output/",
-    "outputDirectory": "vercel-output",
-    "framework": null,
-    "functions": {
-      "api/index.ts": {
-        "memory": 512,
-        "maxDuration": 30
-      }
-    },
-    "rewrites": [
-      { "source": "/api/:path*", "destination": "/api/index" },
-      { "source": "/((?!api).*)", "destination": "/index.html" }
-    ],
-    "headers": [
-      {
-        "source": "/api/(.*)",
-        "headers": [
-          { "key": "Access-Control-Allow-Credentials", "value": "true" },
-          { "key": "Access-Control-Allow-Methods",     "value": "GET,POST,PUT,PATCH,DELETE,OPTIONS" },
-          { "key": "Access-Control-Allow-Headers",     "value": "Content-Type, Authorization" }
-        ]
-      }
-    ]
-  }
-  
+  "version": 2,
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "REPO=$(git rev-parse --show-toplevel) && pnpm --filter @workspace/rafaqaa-website run build && mkdir -p vercel-output && cp -r $REPO/artifacts/rafaqaa-website/dist/. vercel-output/",
+  "outputDirectory": "vercel-output",
+  "framework": null,
+  "functions": {
+    "api/index.ts": {
+      "memory": 512,
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/((?!api).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Methods",     "value": "GET,POST,PUT,PATCH,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers",     "value": "Content-Type, Authorization" }
+      ]
+    }
+  ]
+}
