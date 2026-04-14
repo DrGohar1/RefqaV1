@@ -1,6 +1,7 @@
 /**
  * Pre-builds the API serverless function using esbuild.
- * Creates a fully self-contained bundle (no runtime resolution issues).
+ * Creates a fully self-contained ESM bundle with a require shim
+ * so bundled CJS modules (Express, etc.) work correctly.
  *
  * Run from repo root: node api/build-for-vercel.mjs
  */
@@ -23,7 +24,10 @@ await build({
   format: "esm",
   target: "node20",
   outfile: path.join(__dirname, "handler.mjs"),
-  // Only externalize native addons and packages that can't be bundled
+  // Inject require shim so bundled CJS modules work in ESM context
+  banner: {
+    js: `import { createRequire as __createRequire } from "module"; const require = __createRequire(import.meta.url);`,
+  },
   external: [
     "*.node",
     "pg-native",
@@ -33,7 +37,6 @@ await build({
     "canvas",
     "sharp",
   ],
-  // Bundle everything else including workspace packages and node_modules
   tsconfig: path.join(__dirname, "tsconfig.json"),
   logLevel: "info",
   minify: false,
