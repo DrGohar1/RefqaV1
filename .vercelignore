@@ -1,0 +1,7 @@
+artifacts/api-server
+artifacts/mockup-sandbox
+lib/
+scripts/
+node_modules
+.git
+*.log

@@ -1,0 +1,42 @@
+import { Router } from "express";
+import healthRouter from "./health";
+import authRouter from "./auth";
+import campaignsRouter from "./campaigns";
+import donationsRouter from "./donations";
+import settingsRouter from "./settings";
+import auditLogsRouter from "./audit-logs";
+import uploadRouter from "./upload";
+import statsRouter from "./stats";
+import adminUsersRouter from "./admin-users";
+import permissionTypesRouter from "./permission-types";
+import bannersRouter from "./banners";
+import paymentsRouter from "./payments";
+import paymentSettingsRouter from "./payment-settings";
+import agentsRouter from "./agents";
+import fieldOrdersRouter from "./field-orders";
+import notificationsRouter from "./notifications";
+import backupRouter from "./backup";
+import installRouter from "./install";
+
+const router = Router();
+
+router.use(healthRouter);
+router.use("/auth", authRouter);
+router.use("/campaigns", campaignsRouter);
+router.use("/donations", donationsRouter);
+router.use("/settings", settingsRouter);
+router.use("/audit-logs", auditLogsRouter);
+router.use("/upload", uploadRouter);
+router.use("/stats", statsRouter);
+router.use("/admin-users", adminUsersRouter);
+router.use("/permission-types", permissionTypesRouter);
+router.use("/banners", bannersRouter);
+router.use("/payments", paymentsRouter);
+router.use("/payment-settings", paymentSettingsRouter);
+router.use("/agents", agentsRouter);
+router.use("/field-orders", fieldOrdersRouter);
+router.use("/notifications", notificationsRouter);
+router.use("/backup", backupRouter);
+router.use("/install", installRouter);
+
+export default router;
