@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowRight, Lock, User } from "lucide-react";
-import logoStamp from "@/assets/logo-stamp.jpg";
+const logoStamp = "/logo-stamp.jpg";
 
 const Auth = () => {
   const [username, setUsername] = useState("");
