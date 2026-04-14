@@ -12,24 +12,29 @@
   GitHub (RefqaV1)
         │
         ▼
-  ┌─────────────────────────────┐
-  │          VERCEL             │
-  │                             │
-  │  Frontend (React/Vite) CDN  │
-  │  +                          │
-  │  API Serverless Functions   │
-  │  (api/index.ts → Express)   │
-  └─────────────────────────────┘
-        │              │
-        ▼              ▼
-  ┌──────────┐   ┌──────────────┐
-  │ Supabase │   │  PostgreSQL  │
-  │ (Donatio │   │ (Admin/Sess) │
-  │  ns, etc)│   │ Neon.tech    │
-  └──────────┘   └──────────────┘
+  ┌──────────────────────────────────┐
+  │              VERCEL              │
+  │                                  │
+  │  Frontend (React/Vite)  →  CDN  │
+  │  +                               │
+  │  API Serverless Functions        │
+  │  (api/index.ts → Express)        │
+  │                                  │
+  │  ┌──────────────────────────┐    │
+  │  │  Vercel Postgres (DB)    │    │
+  │  │  Admin + Sessions        │    │
+  │  └──────────────────────────┘    │
+  └──────────────────────────────────┘
+                │
+                ▼
+         ┌────────────┐
+         │  Supabase  │
+         │ Donations  │
+         │ Campaigns  │
+         └────────────┘
   ```
 
-  > ✅ لا Render. لا Railway. كل حاجة على Vercel.
+  > ✅ كل حاجة جوه Vercel — بدون Neon، بدون Render، بدون Railway.
 
   ---
 
@@ -38,9 +43,8 @@
   | الحساب | الرابط | المجاني يكفي؟ |
   |--------|--------|--------------|
   | GitHub | github.com | ✅ |
-  | Vercel | vercel.com | ✅ |
+  | Vercel | vercel.com | ✅ (Hobby) |
   | Supabase | supabase.com | ✅ |
-  | Neon.tech (PostgreSQL) | neon.tech | ✅ |
 
   ---
 
@@ -146,67 +150,58 @@
 
   ---
 
-  ## الخطوة 2 — إعداد PostgreSQL (Neon.tech)
-
-  > لجداول الأدمن والجلسات — مجاني على Neon
-
-  1. اذهب لـ [neon.tech](https://neon.tech) → **New Project**
-  2. بعد الإنشاء، انسخ **Connection String** — مثال:
-     ```
-     postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
-     ```
-  3. هذا هو قيمة **DATABASE_URL** التي ستضيفها في Vercel
-
-  ---
-
-  ## الخطوة 3 — رفع الكود على GitHub
-
-  ```bash
-  git clone https://github.com/DrGohar1/RefqaV1.git
-  cd RefqaV1
-  git remote set-url origin https://github.com/DrGohar1/RefqaV1.git
-  git push origin main
-  ```
-
-  أو إذا عندك fork خاص — اعمل fork من [github.com/DrGohar1/RefqaV1](https://github.com/DrGohar1/RefqaV1)
-
-  ---
-
-  ## الخطوة 4 — إنشاء مشروع Vercel
+  ## الخطوة 2 — إنشاء مشروع Vercel
 
   1. اذهب لـ [vercel.com](https://vercel.com) → **Add New Project**
   2. اختر **Import Git Repository** → اختر **RefqaV1**
-  3. Vercel هيكتشف `vercel.json` تلقائياً ❗ لا تغيّر أي إعدادات
-
-  **إعدادات Build (تلقائية من vercel.json):**
-  - Framework: Other  
-  - Build Command: `pnpm --filter @workspace/rafaqaa-website run build`
-  - Output Directory: `artifacts/rafaqaa-website/dist`
+  3. Vercel هيكتشف `vercel.json` تلقائياً ❗ **لا تغيّر أي إعدادات Build**
 
   ---
 
-  ## الخطوة 5 — متغيرات البيئة في Vercel
+  ## الخطوة 3 — إضافة Vercel Postgres (بديل Neon)
+
+  > Vercel Postgres هو قاعدة بيانات PostgreSQL مدمجة في Vercel — بيضيف `DATABASE_URL` تلقائياً لمشروعك.
+
+  ### 3.1 إنشاء قاعدة البيانات
+  1. في Vercel Dashboard → اختر مشروعك
+  2. اضغط تبويب **Storage**
+  3. اضغط **Create Database** → اختر **Postgres**
+  4. اختر اسم (مثل: `rafqa-db`) → اختر المنطقة الأقرب → **Create**
+
+  ### 3.2 ربطها بالمشروع
+  1. بعد الإنشاء → اضغط **Connect to Project**
+  2. اختر مشروعك → **Connect**
+  3. ✅ Vercel هيضيف هذه المتغيرات تلقائياً:
+     - `DATABASE_URL`
+     - `POSTGRES_URL`
+     - `POSTGRES_HOST`
+     - `POSTGRES_USER`
+     - وغيرها
+
+  ---
+
+  ## الخطوة 4 — متغيرات البيئة في Vercel
 
   **Settings → Environment Variables → Add:**
 
-  ### مطلوبة (الموقع لن يعمل بدونها)
+  ### مطلوبة
 
   | الاسم | القيمة |
   |-------|--------|
-  | `DATABASE_URL` | رابط Neon PostgreSQL |
+  | `DATABASE_URL` | ✅ **تلقائي من Vercel Postgres** |
   | `SUPABASE_URL` | رابط Supabase |
-  | `SUPABASE_ANON_KEY` | anon key من Supabase |
+  | `SUPABASE_ANON_KEY` | anon key |
   | `SUPABASE_SERVICE_ROLE_KEY` | service_role key |
   | `SESSION_SECRET` | نص عشوائي طويل (32+ حرف) |
   | `NODE_ENV` | `production` |
-  | `VITE_API_URL` | **اتركه فارغاً** — API في نفس المشروع |
+  | `VITE_API_URL` | **اتركه فارغاً** |
 
-  ### لإنشاء SESSION_SECRET:
+  ### إنشاء SESSION_SECRET:
   ```bash
   node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
   ```
 
-  ### اختيارية — Paymob (الدفع الأونلاين)
+  ### اختيارية — Paymob
 
   | الاسم | القيمة |
   |-------|--------|
@@ -223,20 +218,25 @@
 
   ---
 
-  ## الخطوة 6 — أول نشر (Deploy)
+  ## الخطوة 5 — أول Deploy وإنشاء جداول الأدمن
 
-  بعد إضافة المتغيرات، اضغط **Deploy** في Vercel.
+  ### 5.1 اضغط Deploy في Vercel
 
-  بعد انتهاء الـ Build، شغّل هذا الأمر مرة واحدة لإنشاء جداول الأدمن:
+  انتظر حتى يكتمل الـ Build.
+
+  ### 5.2 إنشاء جداول الأدمن (مرة واحدة فقط)
+
+  بعد الـ Deploy من جهازك:
 
   ```bash
-  # من جهازك المحلي
   git clone https://github.com/DrGohar1/RefqaV1.git
   cd RefqaV1
   npm install -g pnpm
   pnpm install
   DATABASE_URL="postgresql://..." pnpm --filter @workspace/db run push
   ```
+
+  > **الـ DATABASE_URL** تلاقيه في Vercel → Storage → قاعدة بياناتك → **.env.local** أو **Connection String**
 
   هذا ينشئ جداول:
   - `admin_users` — حسابات الأدمن
@@ -253,27 +253,43 @@
   | `admin` | `admin123` | مدير كامل |
   | `supervisor` | `Rafaqaa@Sup2025` | مشرف |
 
-  > ⚠️ غيّر كلمات المرور فوراً من لوحة التحكم → المستخدمون
+  > ⚠️ غيّر كلمات المرور فوراً من لوحة التحكم
 
   ---
 
-  ## الخطوة 7 — إعداد Paymob Webhook (اختياري)
+  ## الخطوة 6 — ربط الدومين
+
+  ### 6.1 أضف الدومين في Vercel
+  Vercel → Settings → Domains → **Add Domain** → اكتب دومينك
+
+  ### 6.2 حدّث DNS عند شركة الدومين
+
+  ```
+  A     @    →  76.76.21.21
+  CNAME www  →  cname.vercel-dns.com
+  ```
+
+  انتظر من دقيقتين إلى ساعة — الموقع هيشتغل على دومينك.
+
+  ---
+
+  ## الخطوة 7 — Paymob Webhook (اختياري)
 
   في Paymob Dashboard → Settings → Webhook URL:
   ```
-  https://your-site.vercel.app/api/payments/webhook
+  https://your-domain.com/api/payments/webhook
   ```
 
   ---
 
-  ## الخطوة 8 — اختبار الموقع
+  ## اختبار كل حاجة
 
   ```bash
   # فحص الخادم
-  curl https://your-site.vercel.app/api/health
+  curl https://your-domain.com/api/health
 
   # اختبار تسجيل الدخول
-  curl -X POST https://your-site.vercel.app/api/auth/login \
+  curl -X POST https://your-domain.com/api/auth/login \
     -H "Content-Type: application/json" \
     -d '{"username":"admin","password":"admin123"}'
   ```
@@ -284,38 +300,33 @@
 
   | الرابط | الوصف |
   |--------|-------|
-  | `https://your-site.vercel.app` | الموقع الرئيسي |
-  | `https://your-site.vercel.app/admin` | لوحة التحكم |
-  | `https://your-site.vercel.app/track` | تتبع التبرعات |
-  | `https://your-site.vercel.app/api/health` | فحص الخادم |
+  | `https://your-domain.com` | الموقع الرئيسي |
+  | `https://your-domain.com/admin` | لوحة التحكم |
+  | `https://your-domain.com/track` | تتبع التبرعات |
+  | `https://your-domain.com/api/health` | فحص الخادم |
 
   ---
 
-  ## حل المشكلات الشائعة
+  ## حل المشكلات
 
   ### ❌ لا أستطيع تسجيل الدخول
-  - تأكد أن `DATABASE_URL` يحتوي `?sslmode=require`
-  - تأكد أن `SESSION_SECRET` موجود في Vercel
-  - شغّل `db:push` لإنشاء جدول `admin_users`
+  - تأكد أن `DATABASE_URL` موجود في Environment Variables
+  - تأكد من تشغيل `db:push` لإنشاء جدول `admin_users`
+  - تأكد أن `SESSION_SECRET` مضاف
 
   ### ❌ التبرعات لا تظهر
   - تأكد من `SUPABASE_URL` و `SUPABASE_ANON_KEY`
-  - تأكد من إنشاء جداول Supabase من الخطوة 1
-  - تأكد من تفعيل RLS policies
+  - شغّل SQL الخطوة 1 في Supabase
 
   ### ❌ Function timeout
-  - الـ Hobby plan على Vercel يسمح بـ 10 ثواني فقط
-  - زد `maxDuration` في `vercel.json` أو upgrade لـ Pro
+  - Vercel Hobby: max 10 ثواني — زد `maxDuration` في `vercel.json`
 
   ### ❌ CORS error
-  - `VITE_API_URL` يجب أن يكون **فارغاً** (لأن API في نفس Vercel domain)
-
-  ### ❌ الصور لا تظهر
-  - تأكد من `SUPABASE_URL` في Storage settings
+  - `VITE_API_URL` يجب أن يكون **فارغاً** تماماً
 
   ---
 
-  ## ملفات التوثيق
+  ## ملفات التوثيق في الريبو
 
   | الملف | الوصف |
   |-------|-------|
