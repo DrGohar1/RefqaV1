@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { FeatureFlagsProvider } from "@/contexts/FeatureFlagsContext";
 import { SocialLinksProvider } from "@/contexts/SocialLinksContext";
+import { useFeatureFlags } from "@/contexts/FeatureFlagsContext";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
@@ -28,6 +29,32 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppRoutes = () => {
+  const { flags } = useFeatureFlags();
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/admin" element={<Admin />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/policy" element={<Policy />} />
+      <Route
+        path="/zakat"
+        element={flags.zakat_calculator ? <Zakat /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/track"
+        element={<TrackDonation />}
+      />
+      <Route path="/pay" element={<PaymentPage />} />
+      <Route path="/install" element={<Install />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -41,19 +68,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || "/"}>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/admin" element={<Admin />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/policy" element={<Policy />} />
-                    <Route path="/zakat" element={<Zakat />} />
-                    <Route path="/pay" element={<PaymentPage />} />
-                    <Route path="/track" element={<TrackDonation />} />
-                    <Route path="/install" element={<Install />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+                  <AppRoutes />
                 </BrowserRouter>
               </BasketProvider>
             </TooltipProvider>
