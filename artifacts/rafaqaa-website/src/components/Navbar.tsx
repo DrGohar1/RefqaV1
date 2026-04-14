@@ -1,21 +1,24 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Sun, Menu, X, User, Search } from "lucide-react";
+import { Moon, Sun, Menu, X, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
-import logoStamp from "@/assets/logo-stamp.jpg";
+import { useFeatureFlags } from "@/contexts/FeatureFlagsContext";
+
+const logoStamp = "/logo-stamp.jpg";
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
+  const { flags } = useFeatureFlags();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const links = [
     { href: "/#campaigns", label: "الحملات" },
     { href: "/#services", label: "خدماتنا" },
     { href: "/#impact", label: "أثرنا" },
-    { href: "/zakat", label: "حاسبة الزكاة", isRoute: true },
+    ...(flags.zakat_calculator ? [{ href: "/zakat", label: "حاسبة الزكاة", isRoute: true }] : []),
     { href: "/track", label: "تتبع تبرعك", isRoute: true },
     { href: "/#contact", label: "تواصل معنا" },
   ];
