@@ -49,11 +49,7 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    // On Vercel: output to /public at repo root (matches vercel.json outputDirectory: "public")
-    // Locally: output to dist/ inside this package
-    outDir: process.env.VERCEL
-      ? path.resolve(import.meta.dirname, "../../public")
-      : path.resolve(import.meta.dirname, "dist"),
+    outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
   },
   server: {
