@@ -24,7 +24,12 @@ const AdminSettings = () => {
   });
   const [siteDisabledMsg, setSiteDisabledMsg] = useState("الموقع في وضع الصيانة، يرجى المحاولة لاحقاً");
   const [social, setSocial] = useState({
-
+    facebook: "", instagram: "", youtube: "", twitter: "", tiktok: "", linkedin: "",
+    whatsapp: "201130925036", phone: "01130925036",
+    whatsapp_message: "السلام عليكم، أريد الاستفسار عن التبرع",
+    address: "جمهورية مصر العربية", email: "",
+    developer_name: "GOHAR DEV", developer_url: "",
+  });
   const currentLogo = useLogo();
   const [logoUploading, setLogoUploading] = useState(false);
 
@@ -45,12 +50,7 @@ const AdminSettings = () => {
       toast({ title: "خطأ في رفع اللوجو", description: e.message, variant: "destructive" });
     } finally { setLogoUploading(false); }
   };
-    facebook: "", instagram: "", youtube: "", twitter: "", tiktok: "", linkedin: "",
-    whatsapp: "201130925036", phone: "01130925036",
-    whatsapp_message: "السلام عليكم، أريد الاستفسار عن التبرع",
-    address: "جمهورية مصر العربية", email: "",
-    developer_name: "GOHAR DEV", developer_url: "",
-  });
+
 
   useEffect(() => {
     const load = async () => {

@@ -27,7 +27,6 @@ import AdminSuccessStories from "@/components/admin/AdminSuccessStories";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import AdminSEO from "@/components/admin/AdminSEO";
 import AdminBackup from "@/components/admin/AdminBackup";
-const logoStamp = useLogo();
 
 type Tab =
   | "dashboard"
@@ -162,6 +161,7 @@ const GATEWAY_TAB_MAP: Partial<Record<Tab, "all" | "pending" | "approved" | "rej
 };
 
 const Admin = () => {
+  const logoStamp = useLogo();
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

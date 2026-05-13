@@ -1,9 +1,9 @@
 import { useLogo } from "@/hooks/useLogo";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-const logoImg = useLogo();
 
 export default function SplashScreen() {
+  const logoImg = useLogo();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

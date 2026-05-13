@@ -7,9 +7,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureFlags } from "@/contexts/FeatureFlagsContext";
 
-const logoStamp = useLogo();
 
 const Navbar = () => {
+  const logoStamp = useLogo();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const { flags } = useFeatureFlags();
