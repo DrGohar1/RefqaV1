@@ -4,8 +4,8 @@ import {
   LayoutDashboard, FileCheck, BarChart3, CreditCard, UserCog, Settings,
   Shield, ChevronDown, ChevronLeft, ScrollText, LogOut, ArrowRight,
   Clock, CheckCircle2, XCircle, Globe, Bell, Menu, X, Megaphone,
-  Users2, Home, Truck, BotMessageSquare, Mail, Phone, Search,
-  ShieldCheck, Database, Banknote, FileText, Activity, Star, Layers
+  Users2, Home, BotMessageSquare, ShieldCheck, Database, Banknote,
+  Activity, Star
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -38,16 +38,44 @@ type Tab =
   | "seo" | "backup"
   | "users" | "banners" | "security" | "audit-logs" | "settings";
 
-interface SidebarItem { id: Tab; label: string; icon: any; badge?: number; color?: string }
+// ── كل tab مربوط بصلاحية واحدة أو أكثر ──
+const TAB_PERMISSIONS: Record<Tab, string[]> = {
+  dashboard:              ["view_dashboard"],
+  donations:              ["view_donations"],
+  "donations-pending":    ["review_donations"],
+  "donations-approved":   ["approve_donations"],
+  "donations-rejected":   ["reject_donations"],
+  "gateway-all":          ["view_gateway"],
+  "gateway-pending":      ["review_gateway"],
+  "gateway-approved":     ["approve_gateway"],
+  "gateway-rejected":     ["approve_gateway"],
+  "gateway-reports":      ["view_gateway"],
+  "gateway-settings":     ["manage_gateway_settings"],
+  payments:               ["manage_manual_payments"],
+  agents:                 ["manage_agents"],
+  "field-orders":         ["manage_field_orders"],
+  campaigns:              ["manage_campaigns"],
+  "success-stories":      ["manage_success_stories"],
+  banners:                ["manage_banners"],
+  notifications:          ["manage_notifications"],
+  seo:                    ["manage_seo"],
+  users:                  ["manage_users"],
+  settings:               ["manage_settings"],
+  security:               ["manage_security"],
+  "audit-logs":           ["view_audit_logs"],
+  backup:                 ["manage_backup"],
+};
+
+interface SidebarItem { id: Tab; label: string; icon: any; badge?: number; color?: string; permissions: string[] }
 interface SidebarGroup { id: string; label: string; icon: any; color?: string; children: SidebarItem[] }
 
-const sidebarGroups: SidebarGroup[] = [
+const ALL_SIDEBAR_GROUPS: SidebarGroup[] = [
   {
     id: "main",
     label: "الرئيسية",
     icon: LayoutDashboard,
     children: [
-      { id: "dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
+      { id: "dashboard", label: "لوحة التحكم", icon: LayoutDashboard, permissions: ["view_dashboard"] },
     ],
   },
   {
@@ -56,17 +84,17 @@ const sidebarGroups: SidebarGroup[] = [
     icon: FileCheck,
     color: "text-emerald-500",
     children: [
-      { id: "donations",          label: "جميع التبرعات",         icon: FileCheck, color: "text-foreground" },
-      { id: "donations-pending",  label: "قيد المراجعة",          icon: Clock,         color: "text-amber-500" },
-      { id: "donations-approved", label: "التبرعات المعتمدة",     icon: CheckCircle2,  color: "text-emerald-500" },
-      { id: "donations-rejected", label: "التبرعات المرفوضة",     icon: XCircle,       color: "text-red-500" },
-      { id: "gateway-all",        label: "دفع إلكتروني — كل العمليات", icon: CreditCard, color: "text-blue-500" },
-      { id: "gateway-pending",    label: "إلكتروني — قيد المراجعة",   icon: Clock },
-      { id: "gateway-approved",   label: "إلكتروني — المعتمدة",       icon: CheckCircle2 },
-      { id: "gateway-settings",   label: "إعدادات بوابة الدفع",       icon: Settings },
-      { id: "payments",           label: "بوابات الدفع اليدوي",        icon: Banknote },
-      { id: "agents",             label: "المناديب الميدانيون",        icon: Users2 },
-      { id: "field-orders",       label: "طلبات التحصيل",             icon: Home },
+      { id: "donations",          label: "جميع التبرعات",              icon: FileCheck,    color: "text-foreground",  permissions: ["view_donations"] },
+      { id: "donations-pending",  label: "قيد المراجعة",              icon: Clock,        color: "text-amber-500",   permissions: ["review_donations"] },
+      { id: "donations-approved", label: "التبرعات المعتمدة",         icon: CheckCircle2, color: "text-emerald-500", permissions: ["approve_donations"] },
+      { id: "donations-rejected", label: "التبرعات المرفوضة",         icon: XCircle,      color: "text-red-500",     permissions: ["reject_donations"] },
+      { id: "gateway-all",        label: "دفع إلكتروني — كل العمليات", icon: CreditCard,   color: "text-blue-500",    permissions: ["view_gateway"] },
+      { id: "gateway-pending",    label: "إلكتروني — قيد المراجعة",   icon: Clock,        color: "",                 permissions: ["review_gateway"] },
+      { id: "gateway-approved",   label: "إلكتروني — المعتمدة",       icon: CheckCircle2, color: "",                 permissions: ["approve_gateway"] },
+      { id: "gateway-settings",   label: "إعدادات بوابة الدفع",       icon: Settings,     color: "",                 permissions: ["manage_gateway_settings"] },
+      { id: "payments",           label: "بوابات الدفع اليدوي",       icon: Banknote,     color: "",                 permissions: ["manage_manual_payments"] },
+      { id: "agents",             label: "المناديب الميدانيون",       icon: Users2,       color: "",                 permissions: ["manage_agents"] },
+      { id: "field-orders",       label: "طلبات التحصيل",             icon: Home,         color: "",                 permissions: ["manage_field_orders"] },
     ],
   },
   {
@@ -75,9 +103,9 @@ const sidebarGroups: SidebarGroup[] = [
     icon: BarChart3,
     color: "text-purple-500",
     children: [
-      { id: "campaigns",       label: "إدارة الحملات",  icon: BarChart3 },
-      { id: "success-stories", label: "قصص النجاح",    icon: Star },
-      { id: "banners",         label: "البانرات",       icon: Megaphone },
+      { id: "campaigns",       label: "إدارة الحملات", icon: BarChart3, permissions: ["manage_campaigns"] },
+      { id: "success-stories", label: "قصص النجاح",   icon: Star,      permissions: ["manage_success_stories"] },
+      { id: "banners",         label: "البانرات",      icon: Megaphone, permissions: ["manage_banners"] },
     ],
   },
   {
@@ -86,13 +114,13 @@ const sidebarGroups: SidebarGroup[] = [
     icon: Settings,
     color: "text-gray-400",
     children: [
-      { id: "notifications", label: "الإشعارات والتواصل",   icon: Bell },
-      { id: "seo",           label: "SEO وتحسين البحث",    icon: Globe },
-      { id: "users",         label: "إدارة المستخدمين",    icon: UserCog },
-      { id: "settings",      label: "الإعدادات العامة",    icon: Settings },
-      { id: "security",      label: "الحماية والأمان",     icon: Shield },
-      { id: "audit-logs",    label: "سجل العمليات",        icon: ScrollText },
-      { id: "backup",        label: "نسخ احتياطي",        icon: Database },
+      { id: "notifications", label: "الإشعارات والتواصل",  icon: Bell,       permissions: ["manage_notifications"] },
+      { id: "seo",           label: "SEO وتحسين البحث",   icon: Globe,      permissions: ["manage_seo"] },
+      { id: "users",         label: "إدارة المستخدمين",   icon: UserCog,    permissions: ["manage_users"] },
+      { id: "settings",      label: "الإعدادات العامة",   icon: Settings,   permissions: ["manage_settings"] },
+      { id: "security",      label: "الحماية والأمان",    icon: Shield,     permissions: ["manage_security"] },
+      { id: "audit-logs",    label: "سجل العمليات",       icon: ScrollText, permissions: ["view_audit_logs"] },
+      { id: "backup",        label: "نسخ احتياطي",        icon: Database,   permissions: ["manage_backup"] },
     ],
   },
 ];
@@ -137,17 +165,44 @@ const Admin = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<string[]>(["main", "donations-group"]);
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, hasAnyPermission } = useAuth();
   const navigate = useNavigate();
   const isAdmin = user?.role === "admin" || user?.role === "moderator";
+
+  // ── فلترة groups وitems حسب صلاحيات المستخدم ──
+  const sidebarGroups = ALL_SIDEBAR_GROUPS
+    .map(group => ({
+      ...group,
+      children: group.children.filter(item => hasAnyPermission(item.permissions)),
+    }))
+    .filter(group => group.children.length > 0);
 
   useEffect(() => {
     if (!loading && !user) { navigate("/auth"); return; }
     if (!loading && user && !isAdmin) { navigate("/"); }
   }, [user, loading, navigate, isAdmin]);
 
+  // ── guard: لو tab غير مصرح به، روح لأول tab مسموح ──
+  useEffect(() => {
+    if (!user) return;
+    const perms = TAB_PERMISSIONS[activeTab] || [];
+    if (!hasAnyPermission(perms)) {
+      // ابحث عن أول tab مسموح
+      const allTabs = Object.keys(TAB_PERMISSIONS) as Tab[];
+      const first = allTabs.find(t => hasAnyPermission(TAB_PERMISSIONS[t]));
+      if (first) setActiveTab(first);
+    }
+  }, [activeTab, user]);
+
   const toggleGroup = (id: string) => {
     setOpenGroups(prev => prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]);
+  };
+
+  const handleTabChange = (tab: Tab) => {
+    // double-check permission before switching
+    if (!hasAnyPermission(TAB_PERMISSIONS[tab] || [])) return;
+    setActiveTab(tab);
+    setMobileOpen(false);
   };
 
   const donationFilter = activeTab.startsWith("donations-")
@@ -188,7 +243,9 @@ const Admin = () => {
         <div className="px-4 py-2.5 border-b border-sidebar-border bg-sidebar-accent/30">
           <p className="text-[11px] text-sidebar-foreground/50">تسجيل دخول كـ</p>
           <p className="text-xs font-bold text-sidebar-foreground truncate">{user.username || user.email}</p>
-          <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-bold">{user.role === "admin" ? "مدير" : "مشرف"}</span>
+          <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-bold">
+            {user.role === "admin" ? "مدير" : "مشرف"}
+          </span>
         </div>
       )}
 
@@ -211,38 +268,33 @@ const Admin = () => {
               )}
             </button>
 
-            {/* Group items */}
+            {/* Group items — only permitted ones */}
             <AnimatePresence initial={false}>
               {(collapsed || openGroups.includes(group.id)) && (
                 <motion.div
                   initial={collapsed ? false : { height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
+                  exit={collapsed ? {} : { height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="space-y-0.5 pt-0.5">
-                    {group.children.map(item => (
-                      <button
-                        key={item.id}
-                        onClick={() => { setActiveTab(item.id); setMobileOpen(false); }}
-                        title={collapsed ? item.label : undefined}
-                        className={`w-full flex items-center gap-2.5 rounded-xl text-sm transition-all ${
-                          activeTab === item.id
-                            ? "bg-sidebar-primary text-sidebar-primary-foreground font-bold shadow-lg shadow-sidebar-primary/20 px-3 py-2"
-                            : `text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground py-1.5 ${collapsed ? "px-3 justify-center" : "px-3 pr-7"}`
-                        }`}
-                      >
-                        <item.icon className={`w-4 h-4 shrink-0 ${activeTab === item.id ? "" : (item.color || "")}`} />
-                        {!collapsed && <span className="truncate text-xs">{item.label}</span>}
-                        {!collapsed && item.badge && item.badge > 0 && (
-                          <span className="mr-auto min-w-[18px] h-[18px] rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
-                            {item.badge > 9 ? "9+" : item.badge}
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
+                  {group.children.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleTabChange(item.id)}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-colors
+                        ${activeTab === item.id
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                        } ${collapsed ? "justify-center" : "pl-8"}`}
+                    >
+                      <item.icon className={`w-4 h-4 shrink-0 ${activeTab === item.id ? "" : item.color || ""}`} />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                      {!collapsed && item.badge && (
+                        <span className="mr-auto bg-amber-500 text-white text-[10px] rounded-full px-1.5 py-0.5 font-bold">{item.badge}</span>
+                      )}
+                    </button>
+                  ))}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -251,10 +303,10 @@ const Admin = () => {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-sidebar-border space-y-1">
+      <div className="p-2 border-t border-sidebar-border space-y-1">
         <a
           href="/"
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors ${collapsed ? "justify-center" : ""}`}
+          className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors ${collapsed ? "justify-center" : ""}`}
         >
           <ArrowRight className="w-4 h-4 shrink-0" />
           {!collapsed && <span>العودة للموقع</span>}
@@ -269,6 +321,47 @@ const Admin = () => {
       </div>
     </>
   );
+
+  // ── Render section مع guard إضافي ──
+  const renderSection = () => {
+    const perms = TAB_PERMISSIONS[activeTab] || [];
+    if (!hasAnyPermission(perms)) {
+      return (
+        <div className="flex flex-col items-center justify-center py-32 text-center text-muted-foreground">
+          <Shield className="w-16 h-16 mb-4 opacity-20" />
+          <h3 className="text-lg font-semibold">ليس لديك صلاحية لعرض هذا القسم</h3>
+          <p className="text-sm mt-1">تواصل مع المدير لمنحك الصلاحيات اللازمة</p>
+        </div>
+      );
+    }
+
+    if (activeTab === "dashboard") return <AdminAnalytics />;
+
+    if (activeTab === "donations" || activeTab.startsWith("donations-"))
+      return <AdminDonations filterStatus={donationFilter} />;
+
+    if (activeTab.startsWith("gateway-") && activeTab !== "gateway-settings")
+      return <AdminPaymentGateway key={activeTab} initialTab={gatewaySubTab} />;
+    if (activeTab === "gateway-settings") return <AdminPaymentSettings />;
+
+    if (activeTab === "payments")     return <AdminPayments />;
+    if (activeTab === "agents")       return <AdminAgents />;
+    if (activeTab === "field-orders") return <AdminFieldOrders />;
+
+    if (activeTab === "campaigns")       return <AdminCampaigns />;
+    if (activeTab === "success-stories") return <AdminSuccessStories />;
+    if (activeTab === "banners")         return <AdminBanners />;
+
+    if (activeTab === "notifications") return <AdminNotifications />;
+    if (activeTab === "seo")           return <AdminSEO />;
+    if (activeTab === "users")         return <AdminUsers />;
+    if (activeTab === "settings")      return <AdminSettings />;
+    if (activeTab === "security")      return <AdminSecurity />;
+    if (activeTab === "audit-logs")    return <AdminAuditLogs />;
+    if (activeTab === "backup")        return <AdminBackup />;
+
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-background font-body flex" dir="rtl">
@@ -332,39 +425,7 @@ const Admin = () => {
 
         <div className="p-4 md:p-6">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-
-            {activeTab === "dashboard" && <AdminAnalytics />}
-
-            {/* ── Donations ── */}
-            {(activeTab === "donations" || activeTab.startsWith("donations-")) && (
-              <AdminDonations filterStatus={donationFilter} />
-            )}
-
-            {/* ── Online Gateway ── */}
-            {activeTab.startsWith("gateway-") && activeTab !== "gateway-settings" && (
-              <AdminPaymentGateway key={activeTab} initialTab={gatewaySubTab} />
-            )}
-            {activeTab === "gateway-settings" && <AdminPaymentSettings />}
-
-            {/* ── Manual & Field ── */}
-            {activeTab === "payments"     && <AdminPayments />}
-            {activeTab === "agents"       && <AdminAgents />}
-            {activeTab === "field-orders" && <AdminFieldOrders />}
-
-            {/* ── Campaigns ── */}
-            {activeTab === "campaigns"       && <AdminCampaigns />}
-            {activeTab === "success-stories" && <AdminSuccessStories />}
-            {activeTab === "banners"         && <AdminBanners />}
-
-            {/* ── System ── */}
-            {activeTab === "notifications" && <AdminNotifications />}
-            {activeTab === "seo"           && <AdminSEO />}
-            {activeTab === "users"         && <AdminUsers />}
-            {activeTab === "settings"      && <AdminSettings />}
-            {activeTab === "security"      && <AdminSecurity />}
-            {activeTab === "audit-logs"    && <AdminAuditLogs />}
-            {activeTab === "backup"        && <AdminBackup />}
-
+            {renderSection()}
           </motion.div>
         </div>
       </main>

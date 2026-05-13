@@ -16,6 +16,8 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   signIn: (username: string, password: string) => Promise<{ error: string | null }>;
+  hasPermission: (key: string) => boolean;
+  hasAnyPermission: (keys: string[]) => boolean;
 }
 
 const AUTH_CACHE_KEY = "rafaqaa_auth_user";
@@ -49,8 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(serverUser);
       setCachedUser(serverUser);
     } catch {
-      // API temporarily unavailable — keep cached session to prevent false logout
-      // If cookie is invalid, server will return {user: null} next time it's reachable
+      // API temporarily unavailable — keep cached session
     } finally {
       setLoading(false);
     }
@@ -79,10 +80,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setCachedUser(null);
   };
 
+  // ── الفاحص المركزي للصلاحيات ──
+  const hasPermission = (key: string): boolean => {
+    if (!user) return false;
+    // المدير الكامل يملك كل الصلاحيات
+    if (user.permissions?.["manage_users"] === true &&
+        user.permissions?.["manage_settings"] === true &&
+        user.permissions?.["manage_campaigns"] === true) return true;
+    return user.permissions?.[key] === true;
+  };
+
+  const hasAnyPermission = (keys: string[]): boolean => {
+    if (!user) return false;
+    // المدير الكامل
+    if (user.permissions?.["manage_users"] === true &&
+        user.permissions?.["manage_settings"] === true &&
+        user.permissions?.["manage_campaigns"] === true) return true;
+    return keys.some((k) => user.permissions?.[k] === true);
+  };
+
   const session = user ? { user } : null;
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut, signIn }}>
+    <AuthContext.Provider value={{ user, session, loading, signOut, signIn, hasPermission, hasAnyPermission }}>
       {children}
     </AuthContext.Provider>
   );
