@@ -1,7 +1,7 @@
+import { useLogo } from "@/hooks/useLogo";
 import { Phone, MessageCircle, MapPin, Mail, Facebook, Instagram, Youtube, Twitter, ExternalLink, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSocialLinks } from "@/contexts/SocialLinksContext";
-import logoStamp from "@/assets/logo-stamp.jpg";
 
 const socialIcons: Record<string, React.ReactNode> = {
   facebook: <Facebook className="w-4 h-4" />,
@@ -20,6 +20,7 @@ const socialLabels: Record<string, string> = {
 };
 
 const Footer = () => {
+  const logoStamp = useLogo();
   const { links } = useSocialLinks();
 
   const activeSocials = [

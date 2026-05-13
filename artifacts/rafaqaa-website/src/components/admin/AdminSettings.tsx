@@ -3,7 +3,8 @@ import { fetchSettings, updateSettings } from "@/lib/supabase-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Shield, Globe, FileText, Link, MessageSquare, RefreshCw } from "lucide-react";
+import { useLogo, notifyLogoChange } from "@/hooks/useLogo";
+import { Save, Upload, ImageIcon, Shield, Globe, FileText, Link, MessageSquare, RefreshCw } from "lucide-react";
 import api from "@/lib/api-client";
 import { useFeatureFlags } from "@/contexts/FeatureFlagsContext";
 
@@ -23,6 +24,27 @@ const AdminSettings = () => {
   });
   const [siteDisabledMsg, setSiteDisabledMsg] = useState("الموقع في وضع الصيانة، يرجى المحاولة لاحقاً");
   const [social, setSocial] = useState({
+
+  const currentLogo = useLogo();
+  const [logoUploading, setLogoUploading] = useState(false);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/uploads/logo", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.url) {
+        notifyLogoChange(data.url + "?t=" + Date.now());
+        toast({ title: "✅ تم رفع اللوجو — يظهر الآن في كل صفحات الموقع" });
+      }
+    } catch (e: any) {
+      toast({ title: "خطأ في رفع اللوجو", description: e.message, variant: "destructive" });
+    } finally { setLogoUploading(false); }
+  };
     facebook: "", instagram: "", youtube: "", twitter: "", tiktok: "", linkedin: "",
     whatsapp: "201130925036", phone: "01130925036",
     whatsapp_message: "السلام عليكم، أريد الاستفسار عن التبرع",
@@ -93,6 +115,7 @@ const AdminSettings = () => {
   };
 
   const sections = [
+    { id: "logo", label: "الشعار", icon: ImageIcon },
     { id: "general", label: "عام", icon: Globe },
     { id: "social", label: "سوشيال", icon: Link },
     { id: "whatsapp", label: "واتساب", icon: MessageSquare },
@@ -121,6 +144,51 @@ const AdminSettings = () => {
       </div>
 
       {/* ── General ── */}
+      
+      {activeSec === "logo" && (
+        <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
+          <div>
+            <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-primary" />شعار الموقع
+            </h3>
+            <p className="text-sm text-muted-foreground">يظهر في الهيدر، الفوتر، شاشة التحميل، ولوحة الإدارة</p>
+          </div>
+
+          {/* Preview */}
+          <div className="flex items-center justify-center w-44 h-44 mx-auto rounded-2xl border-2 border-dashed border-border bg-muted/30 overflow-hidden">
+            {currentLogo && currentLogo !== "/logo-stamp.png" ? (
+              <img src={currentLogo} alt="الشعار الحالي" className="w-full h-full object-contain p-3" />
+            ) : (
+              <div className="text-center text-muted-foreground">
+                <ImageIcon className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p className="text-xs">اللوجو الافتراضي</p>
+              </div>
+            )}
+          </div>
+
+          {/* Upload area */}
+          <label className={`flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-colors ${logoUploading ? "opacity-50 cursor-not-allowed" : "border-primary/40 hover:border-primary hover:bg-primary/5"}`}>
+            {logoUploading ? (
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Upload className="w-8 h-8 text-primary" />
+            )}
+            <div className="text-center">
+              <p className="font-semibold text-sm">{logoUploading ? "جاري الرفع..." : "اضغط لرفع لوجو جديد"}</p>
+              <p className="text-xs text-muted-foreground mt-1">PNG بخلفية شفافة — JPG / WebP / SVG</p>
+              <p className="text-xs text-muted-foreground">حد أقصى 5 MB</p>
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleLogoUpload}
+              disabled={logoUploading}
+            />
+          </label>
+        </div>
+      )}
+
       {activeSec === "general" && (
         <div className="bg-card rounded-2xl p-6 shadow-card border border-border space-y-4">
           <div className="flex items-center gap-2">

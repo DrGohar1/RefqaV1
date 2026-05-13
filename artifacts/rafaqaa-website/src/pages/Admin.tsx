@@ -1,3 +1,4 @@
+import { useLogo } from "@/hooks/useLogo";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,7 +27,7 @@ import AdminSuccessStories from "@/components/admin/AdminSuccessStories";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import AdminSEO from "@/components/admin/AdminSEO";
 import AdminBackup from "@/components/admin/AdminBackup";
-const logoStamp = "/logo-stamp.jpg";
+const logoStamp = useLogo();
 
 type Tab =
   | "dashboard"

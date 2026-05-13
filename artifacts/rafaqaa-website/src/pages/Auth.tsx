@@ -1,3 +1,4 @@
+import { useLogo } from "@/hooks/useLogo";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowRight, Lock, User } from "lucide-react";
-const logoStamp = "/logo-stamp.jpg";
+const logoStamp = useLogo();
 
 const Auth = () => {
   const [username, setUsername] = useState("");

@@ -1,3 +1,4 @@
+import { useLogo } from "@/hooks/useLogo";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Moon, Sun, Menu, X, User } from "lucide-react";
@@ -6,7 +7,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureFlags } from "@/contexts/FeatureFlagsContext";
 
-const logoStamp = "/logo-stamp.jpg";
+const logoStamp = useLogo();
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
